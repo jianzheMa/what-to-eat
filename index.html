@@ -2,8 +2,20 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>今天吃什么</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>今天吃什么 - 随机餐厅推荐</title>
+<meta name="description" content="不知道吃什么？让运气帮你决定！基于高德地图随机推荐附近餐厅，支持评分/距离/价格筛选，一键导航。">
+<meta name="theme-color" content="#f97316">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="今天吃什么">
+<meta property="og:title" content="今天吃什么 - 随机餐厅推荐">
+<meta property="og:description" content="选择困难症救星！随机推荐附近餐厅，支持评分/距离/价格筛选。">
+<meta property="og:type" content="website">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<link rel="preconnect" href="https://webapi.amap.com">
+<link rel="preconnect" href="https://uri.amap.com">
+<link rel="dns-prefetch" href="https://webapi.amap.com">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -31,8 +43,35 @@ body {
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
+  min-height: 100dvh;
   line-height: 1.5;
   -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: contain;
+}
+
+/* Accessibility: focus ring */
+:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Safe area for notched phones */
+@supports (padding: max(0px)) {
+  .container {
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
 }
 
 .container {
@@ -615,7 +654,7 @@ body {
 </style>
 </head>
 <body>
-<div class="container">
+<div class="container" role="main">
   <!-- Header -->
   <div class="header">
     <h1>🍽️ 今天吃什么？</h1>
@@ -623,19 +662,19 @@ body {
   </div>
 
   <!-- Location Status -->
-  <div class="location-status" id="locationStatus">
+  <div class="location-status" id="locationStatus" role="status" aria-live="polite">
     <span class="dot" id="locationDot"></span>
     <span id="locationText">等待定位...</span>
   </div>
   <div style="text-align:center;margin-top:4px;">
-    <button class="api-config-toggle" id="apiConfigToggle">⚙️ 修改API配置</button>
+    <button class="api-config-toggle" id="apiConfigToggle" aria-label="修改高德地图API配置">⚙️ 修改API配置</button>
   </div>
 
   <!-- API Key Section -->
   <div class="api-key-section hidden" id="apiKeySection">
     <label>🔑 高德地图 API Key 和安全密钥</label>
     <p class="help-text">
-      前往 <a href="https://console.amap.com/" target="_blank">高德开放平台</a> 申请 Key（选择「Web端 JS API」），创建后会同时提供 Key 和 <strong>安全密钥</strong>
+      前往 <a href="https://console.amap.com/" target="_blank" rel="noopener noreferrer">高德开放平台</a> 申请 Key（选择「Web端 JS API」），创建后会同时提供 Key 和 <strong>安全密钥</strong>
     </p>
     <label style="font-size:12px;color:var(--text-secondary);display:block;margin-bottom:4px;text-align:left;">API Key</label>
     <input type="text" id="apiKeyInput" placeholder="粘贴 API Key">
@@ -655,11 +694,11 @@ body {
 
   <!-- Main Button -->
   <div class="btn-row">
-    <button class="btn btn-primary" id="pickBtn" disabled>🎲 随便吃点</button>
+    <button class="btn btn-primary" id="pickBtn" disabled aria-label="随机推荐附近餐厅">🎲 随便吃点</button>
   </div>
 
   <!-- Result Card -->
-  <div class="result-card" id="resultCard">
+  <div class="result-card" id="resultCard" aria-live="polite" aria-atomic="true">
     <div class="result-empty">
       <div class="icon">🤔</div>
       <p>点击按钮，随机推荐附近餐厅</p>
@@ -676,7 +715,7 @@ body {
 
   <!-- Filter Settings -->
   <div class="section">
-    <div class="section-header" id="filterHeader">
+    <div class="section-header" id="filterHeader" role="button" tabindex="0" aria-expanded="true">
       <h2>⚙️ 筛选设置</h2>
       <span class="arrow open" id="filterArrow">▼</span>
     </div>
@@ -722,7 +761,7 @@ body {
 
   <!-- History -->
   <div class="section">
-    <div class="section-header" id="historyHeader">
+    <div class="section-header" id="historyHeader" role="button" tabindex="0" aria-expanded="false">
       <h2>📋 历史记录（近7天）</h2>
       <span class="arrow" id="historyArrow">▼</span>
     </div>
@@ -734,7 +773,7 @@ body {
 
   <!-- Blacklist -->
   <div class="section">
-    <div class="section-header" id="blacklistHeader">
+    <div class="section-header" id="blacklistHeader" role="button" tabindex="0" aria-expanded="false">
       <h2>🚫 黑名单</h2>
       <span class="arrow" id="blacklistArrow">▼</span>
     </div>
@@ -745,7 +784,7 @@ body {
 
   <!-- Favorites -->
   <div class="section">
-    <div class="section-header" id="favHeader">
+    <div class="section-header" id="favHeader" role="button" tabindex="0" aria-expanded="false">
       <h2>⭐ 想去</h2>
       <span class="arrow" id="favArrow">▼</span>
     </div>
@@ -758,7 +797,7 @@ body {
 
   <!-- Debug Panel -->
   <div class="section" id="debugPanel">
-    <div class="section-header" id="debugHeader">
+    <div class="section-header" id="debugHeader" role="button" tabindex="0" aria-expanded="false">
       <h2>🔧 调试信息</h2>
       <span class="arrow" id="debugArrow">▼</span>
     </div>
@@ -1251,7 +1290,7 @@ function displayResult(restaurant) {
   var photoUrl = getPhotoUrl(restaurant);
 
   dom.resultCard.innerHTML = `
-    ${photoUrl ? '<img class="result-photo" src="' + photoUrl + '" alt="' + escapeHtml(restaurant.name) + '" onerror="this.style.display=\'none\'">' : ''}
+    ${photoUrl ? '<img class="result-photo" src="' + photoUrl + '" alt="' + escapeHtml(restaurant.name) + '" loading="lazy" onerror="this.style.display=\'none\'">' : ''}
     <div class="result-name">${escapeHtml(restaurant.name)}</div>
     <div class="result-stars">
       ${renderStars(rating)}
@@ -1265,7 +1304,7 @@ function displayResult(restaurant) {
     <div class="result-address">${escapeHtml(restaurant.address || '')}</div>
     ${typeLabel ? '<span class="result-type">' + escapeHtml(typeLabel) + '</span>' : ''}
     ${hasLocation ? '<div class="result-map" id="miniMapContainer"></div>' : ''}
-    ${navUrl ? '<div class="result-nav-row"><a class="result-nav-btn" href="' + navUrl + '" target="_blank" rel="noopener">🧭 导航去这里</a></div>' : ''}
+    ${navUrl ? '<div class="result-nav-row"><a class="result-nav-btn" href="' + navUrl + '" target="_blank" rel="noopener noreferrer">🧭 导航去这里</a></div>' : ''}
   `;
 
   dom.resultActions.classList.remove('hidden');
@@ -1302,7 +1341,7 @@ function displayMultiResult(restaurants) {
       '</div>' +
       (r.address ? '<div class="mr-address">' + escapeHtml(r.address) + '</div>' : '') +
       '<div class="mr-actions">' +
-        (navUrl ? '<a class="mr-nav" href="' + navUrl + '" target="_blank" rel="noopener">🧭 导航</a>' : '') +
+        (navUrl ? '<a class="mr-nav" href="' + navUrl + '" target="_blank" rel="noopener noreferrer">🧭 导航</a>' : '') +
         '<button class="mr-blacklist" data-mr-idx="' + i + '">🚫 拉黑</button>' +
       '</div>' +
     '</div>';
@@ -1870,8 +1909,22 @@ dom.cuisineTags.addEventListener('click', (e) => {
 function bindCollapse(header, arrow, body) {
   header.addEventListener('click', () => {
     const isOpen = body.classList.contains('open');
-    if (isOpen) { body.classList.remove('open'); arrow.classList.remove('open'); }
-    else { body.classList.add('open'); arrow.classList.add('open'); }
+    if (isOpen) {
+      body.classList.remove('open');
+      arrow.classList.remove('open');
+      header.setAttribute('aria-expanded', 'false');
+    } else {
+      body.classList.add('open');
+      arrow.classList.add('open');
+      header.setAttribute('aria-expanded', 'true');
+    }
+  });
+  // Keyboard support
+  header.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      header.click();
+    }
   });
 }
 bindCollapse($('#filterHeader'), dom.filterArrow, dom.filterBody);

@@ -370,6 +370,39 @@ body {
   justify-content: center;
 }
 
+/* Mini map */
+.result-map {
+  width: 100%;
+  height: 200px;
+  border-radius: var(--radius-sm);
+  margin-top: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.result-nav-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.result-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 16px;
+  background: #1677ff;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.result-nav-btn:hover { background: #0958d9; box-shadow: 0 2px 8px rgba(22, 119, 255, 0.3); }
+
 /* History & Blacklist */
 .list-item {
   display: flex;
@@ -709,6 +742,7 @@ let state = {
   currentResult: null,     // currently displayed restaurant
   isSearching: false,
   sdkReady: false,
+  miniMap: null,           // AMap instance for result mini map
 };
 
 let settings = loadJSON(SETTINGS_KEY, DEFAULT_SETTINGS);
@@ -1031,6 +1065,7 @@ function getReviewCount(poi) {
 
 function displayResult(restaurant) {
   state.currentResult = restaurant;
+  destroyMiniMap();
 
   if (!restaurant) {
     dom.resultCard.classList.remove('has-result');
@@ -1045,34 +1080,96 @@ function displayResult(restaurant) {
   }
 
   dom.resultCard.classList.add('has-result');
-  const rating = getRating(restaurant);
-  const cost = getCost(restaurant);
-  const reviewCount = getReviewCount(restaurant);
-  const dist = restaurant.distance || 0;
-  const typeLabel = getTypeLabel(restaurant.type);
+  var rating = getRating(restaurant);
+  var cost = getCost(restaurant);
+  var reviewCount = getReviewCount(restaurant);
+  var dist = restaurant.distance || 0;
+  var typeLabel = getTypeLabel(restaurant.type);
+  var navUrl = getNavUrl(restaurant);
+  var hasLocation = !!getPoiLocation(restaurant);
 
   dom.resultCard.innerHTML = `
     <div class="result-name">${escapeHtml(restaurant.name)}</div>
     <div class="result-stars">
       ${renderStars(rating)}
       <span class="score">${rating > 0 ? rating.toFixed(1) : '暂无评分'}</span>
-      ${reviewCount > 0 ? `<span class="review-count">${reviewCount}条评价</span>` : ''}
+      ${reviewCount > 0 ? '<span class="review-count">' + reviewCount + '条评价</span>' : ''}
     </div>
     <div class="result-meta">
       <span>📍 ${formatDistance(dist)}</span>
-      ${cost > 0 ? `<span>💰 人均 ¥${cost}</span>` : ''}
+      ${cost > 0 ? '<span>💰 人均 ¥' + cost + '</span>' : ''}
     </div>
     <div class="result-address">${escapeHtml(restaurant.address || '')}</div>
-    ${typeLabel ? `<span class="result-type">${escapeHtml(typeLabel)}</span>` : ''}
+    ${typeLabel ? '<span class="result-type">' + escapeHtml(typeLabel) + '</span>' : ''}
+    ${hasLocation ? '<div class="result-map" id="miniMapContainer"></div>' : ''}
+    ${navUrl ? '<div class="result-nav-row"><a class="result-nav-btn" href="' + navUrl + '" target="_blank" rel="noopener">🧭 导航去这里</a></div>' : ''}
   `;
 
   dom.resultActions.classList.remove('hidden');
+
+  // Render mini map if location available
+  if (hasLocation) {
+    var mapContainer = document.getElementById('miniMapContainer');
+    if (mapContainer) {
+      setTimeout(function() { renderMiniMap(mapContainer, restaurant); }, 100);
+    }
+  }
 }
 
 function escapeHtml(str) {
   const div = document.createElement('div');
   div.textContent = str;
   return div.innerHTML;
+}
+
+// ========== Mini Map & Navigation ==========
+function getPoiLocation(poi) {
+  if (!poi || !poi.location) return null;
+  var loc = poi.location;
+  var lng = typeof loc.lng === 'number' ? loc.lng : (typeof loc.getLng === 'function' ? loc.getLng() : null);
+  var lat = typeof loc.lat === 'number' ? loc.lat : (typeof loc.getLat === 'function' ? loc.getLat() : null);
+  if (lng == null || lat == null) return null;
+  return { lng: lng, lat: lat };
+}
+
+function getNavUrl(poi) {
+  var loc = getPoiLocation(poi);
+  if (!loc) return null;
+  return 'https://uri.amap.com/navigation?to=' + loc.lng + ',' + loc.lat + ',' + encodeURIComponent(poi.name) + '&mode=car&callnative=1';
+}
+
+function destroyMiniMap() {
+  if (state.miniMap) {
+    try { state.miniMap.destroy(); } catch (e) {}
+    state.miniMap = null;
+  }
+}
+
+function renderMiniMap(container, poi) {
+  destroyMiniMap();
+  var loc = getPoiLocation(poi);
+  if (!loc || !window.AMap) return;
+
+  var map = new AMap.Map(container, {
+    zoom: 16,
+    center: [loc.lng, loc.lat],
+    resizeEnable: true,
+    scrollWheel: false,
+    dragEnable: false,
+    zoomEnable: false,
+    doubleClickZoom: false,
+    keyboardEnable: false,
+    showBuildingBlock: true,
+  });
+
+  var marker = new AMap.Marker({
+    position: [loc.lng, loc.lat],
+    title: poi.name,
+    anchor: 'center',
+  });
+  map.add(marker);
+
+  state.miniMap = map;
 }
 
 // ========== Main Action ==========
@@ -1085,6 +1182,7 @@ async function doPick() {
 
   state.isSearching = true;
   dom.pickBtn.disabled = true;
+  destroyMiniMap();
   showSpinner('正在搜索周边餐厅...');
   dom.resultCard.classList.remove('has-result');
   dom.resultCard.innerHTML = '<div class="result-empty"><p>搜索中...</p></div>';

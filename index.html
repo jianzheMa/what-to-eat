@@ -569,6 +569,7 @@ body {
   <div class="result-actions hidden" id="resultActions">
     <button class="btn btn-secondary btn-sm" id="rerollBtn">🔄 换一个</button>
     <button class="btn btn-secondary btn-sm" id="blacklistBtn">🚫 拉黑这家</button>
+    <button class="btn btn-secondary btn-sm" id="favResultBtn">⭐ 想去</button>
   </div>
 
   <!-- Filter Settings -->
@@ -640,6 +641,17 @@ body {
     </div>
   </div>
 
+  <!-- Favorites -->
+  <div class="section">
+    <div class="section-header" id="favHeader">
+      <h2>⭐ 想去</h2>
+      <span class="arrow" id="favArrow">▼</span>
+    </div>
+    <div class="section-body" id="favBody">
+      <div id="favList"><div class="list-empty">暂无收藏</div></div>
+    </div>
+  </div>
+
   <div class="footer">Powered by 高德地图 · 数据仅供参考</div>
 
   <!-- Debug Panel -->
@@ -700,6 +712,10 @@ const dom = {
   historyArrow: $('#historyArrow'),
   blacklistBody: $('#blacklistBody'),
   blacklistArrow: $('#blacklistArrow'),
+  favBody: $('#favBody'),
+  favArrow: $('#favArrow'),
+  favList: $('#favList'),
+  favResultBtn: $('#favResultBtn'),
   debugPanel: $('#debugPanel'),
   debugContent: $('#debugContent'),
   debugBody: $('#debugBody'),
@@ -723,6 +739,7 @@ function debugLog(label, data) {
 const SETTINGS_KEY = 'eat_settings';
 const HISTORY_KEY = 'eat_history';
 const BLACKLIST_KEY = 'eat_blacklist';
+const FAVORITES_KEY = 'eat_favorites';
 const API_KEY_STORAGE = 'amap_api_key';
 const SECURITY_CODE_STORAGE = 'amap_security_code';
 
@@ -761,6 +778,7 @@ let state = {
 let settings = loadJSON(SETTINGS_KEY, DEFAULT_SETTINGS);
 let history = loadJSON(HISTORY_KEY, []);
 let blacklist = loadJSON(BLACKLIST_KEY, []);
+let favorites = loadJSON(FAVORITES_KEY, []);
 let apiKey = localStorage.getItem(API_KEY_STORAGE) || '';
 let securityCode = localStorage.getItem(SECURITY_CODE_STORAGE) || '';
 
@@ -1119,6 +1137,7 @@ function displayResult(restaurant) {
   `;
 
   dom.resultActions.classList.remove('hidden');
+  updateFavResultBtn();
 
   // Render mini map if location available
   if (hasLocation) {
@@ -1318,14 +1337,30 @@ function renderHistory() {
     var costHtml = h.cost > 0 ? '<span>💰 ¥' + h.cost + '</span>' : '';
     var typeHtml = h.typeLabel ? '<span style="color:#f97316;">' + escapeHtml(h.typeLabel) + '</span>' : '';
     var countHtml = h.pickCount > 1 ? '<span>🎲 ' + h.pickCount + '次</span>' : '';
+    var faved = isFavorite(h.id);
     return '<div class="list-item" data-idx="' + idx + '">' +
       '<div class="info">' +
         '<div class="name">' + escapeHtml(h.name) + '</div>' +
         '<div class="meta">' + [starsHtml, distHtml, costHtml, typeHtml, countHtml].filter(Boolean).join('') + '</div>' +
         '<div class="date">' + new Date(h.timestamp).toLocaleDateString('zh-CN') + '</div>' +
       '</div>' +
+      '<div class="item-actions">' +
+        '<button class="fav-btn' + (faved ? ' faved' : '') + '" data-hist-idx="' + idx + '">' + (faved ? '★' : '☆') + '</button>' +
+      '</div>' +
     '</div>';
   }).join('');
+}
+
+function historyToRestaurant(h) {
+  return {
+    name: h.name,
+    rating: h.rating,
+    cost: h.cost,
+    distance: h.distance,
+    type: h.typeLabel,
+    address: h.address,
+    location: h.location,
+  };
 }
 
 function clearHistory() {
@@ -1334,6 +1369,144 @@ function clearHistory() {
   renderHistory();
   showToast('历史记录已清空');
 }
+
+// Click handler for history items (delegated: click row or fav button)
+dom.historyList.addEventListener('click', function(e) {
+  var item = e.target.closest('.list-item');
+  if (!item) return;
+  var idx = parseInt(item.dataset.idx);
+  var recent = history.filter(function(h) { return Date.now() - h.timestamp < SEVEN_DAYS; });
+  var entry = recent[idx];
+  if (!entry) return;
+
+  // Fav button click
+  if (e.target.closest('.fav-btn')) {
+    e.stopPropagation();
+    toggleFavorite(entry);
+    return;
+  }
+
+  // Row click — re-display
+  displayResult(historyToRestaurant(entry));
+  window.scrollTo({ top: dom.resultCard.offsetTop - 20, behavior: 'smooth' });
+});
+
+// ========== Favorites ==========
+function isFavorite(id) {
+  return favorites.some(function(f) { return f.id === id; });
+}
+
+function toggleFavorite(data) {
+  if (!data || !data.name) return;
+  if (isFavorite(data.id)) {
+    favorites = favorites.filter(function(f) { return f.id !== data.id; });
+    showToast('已取消收藏「' + data.name + '」');
+  } else {
+    favorites.unshift({
+      id: data.id,
+      name: data.name,
+      timestamp: Date.now(),
+      rating: data.rating,
+      distance: data.distance,
+      cost: data.cost,
+      typeLabel: data.typeLabel,
+      address: data.address,
+      location: data.location,
+    });
+    showToast('已收藏「' + data.name + '」⭐');
+  }
+  saveJSON(FAVORITES_KEY, favorites);
+  renderFavorites();
+  renderHistory();
+  updateFavResultBtn();
+}
+
+function getFavData(restaurant) {
+  return {
+    id: restaurant.id,
+    name: restaurant.name,
+    rating: getRating(restaurant),
+    distance: restaurant.distance || 0,
+    cost: getCost(restaurant),
+    typeLabel: getTypeLabel(restaurant.type),
+    address: restaurant.address || '',
+    location: getPoiLocation(restaurant),
+  };
+}
+
+function updateFavResultBtn() {
+  if (!state.currentResult) return;
+  if (isFavorite(state.currentResult.id)) {
+    dom.favResultBtn.textContent = '⭐ 已收藏';
+    dom.favResultBtn.style.color = '#f59e0b';
+  } else {
+    dom.favResultBtn.textContent = '⭐ 想去';
+    dom.favResultBtn.style.color = '';
+  }
+}
+
+function renderFavorites() {
+  if (favorites.length === 0) {
+    dom.favList.innerHTML = '<div class="list-empty">暂无收藏</div>';
+    return;
+  }
+  dom.favList.innerHTML = favorites.map(function(f, idx) {
+    var starsHtml = f.rating > 0 ? '<span style="color:#f59e0b;">★ ' + f.rating.toFixed(1) + '</span>' : '';
+    var distHtml = f.distance > 0 ? '<span>📍 ' + formatDistance(f.distance) + '</span>' : '';
+    var costHtml = f.cost > 0 ? '<span>💰 ¥' + f.cost + '</span>' : '';
+    var typeHtml = f.typeLabel ? '<span style="color:#f97316;">' + escapeHtml(f.typeLabel) + '</span>' : '';
+    return '<div class="list-item" data-idx="' + idx + '">' +
+      '<div class="info">' +
+        '<div class="name">' + escapeHtml(f.name) + '</div>' +
+        '<div class="meta">' + [starsHtml, distHtml, costHtml, typeHtml].filter(Boolean).join('') + '</div>' +
+      '</div>' +
+      '<div class="item-actions">' +
+        '<button class="fav-btn faved" data-fav-idx="' + idx + '">★</button>' +
+        '<button class="remove-btn" data-fav-idx="' + idx + '">×</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  // Bind fav toggle buttons in favorites list
+  dom.favList.querySelectorAll('.fav-btn').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var fi = parseInt(btn.dataset.favIdx);
+      var entry = favorites[fi];
+      if (entry) toggleFavorite(entry);
+    });
+  });
+
+  // Bind remove buttons in favorites list
+  dom.favList.querySelectorAll('.remove-btn').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var fi = parseInt(btn.dataset.favIdx);
+      var entry = favorites[fi];
+      if (entry) {
+        favorites = favorites.filter(function(f) { return f.id !== entry.id; });
+        saveJSON(FAVORITES_KEY, favorites);
+        renderFavorites();
+        renderHistory();
+        updateFavResultBtn();
+        showToast('已移除「' + entry.name + '」');
+      }
+    });
+  });
+}
+
+// Click handler for favorites list
+dom.favList.addEventListener('click', function(e) {
+  var item = e.target.closest('.list-item');
+  if (!item) return;
+  if (e.target.closest('.fav-btn') || e.target.closest('.remove-btn')) return;
+  var idx = parseInt(item.dataset.idx);
+  var entry = favorites[idx];
+  if (entry) {
+    displayResult(historyToRestaurant(entry));
+    window.scrollTo({ top: dom.resultCard.offsetTop - 20, behavior: 'smooth' });
+  }
+});
 
 // ========== Blacklist ==========
 function renderBlacklist() {
@@ -1389,6 +1562,9 @@ function updateSettings() {
 dom.pickBtn.addEventListener('click', doPick);
 dom.rerollBtn.addEventListener('click', reroll);
 dom.blacklistBtn.addEventListener('click', () => addToBlacklist(state.currentResult));
+dom.favResultBtn.addEventListener('click', () => {
+  if (state.currentResult) toggleFavorite(getFavData(state.currentResult));
+});
 dom.clearHistoryBtn.addEventListener('click', clearHistory);
 
 dom.ratingSlider.addEventListener('input', () => {
@@ -1440,6 +1616,7 @@ function bindCollapse(header, arrow, body) {
 bindCollapse($('#filterHeader'), dom.filterArrow, dom.filterBody);
 bindCollapse($('#historyHeader'), dom.historyArrow, dom.historyBody);
 bindCollapse($('#blacklistHeader'), dom.blacklistArrow, dom.blacklistBody);
+bindCollapse($('#favHeader'), dom.favArrow, dom.favBody);
 bindCollapse($('#debugHeader'), dom.debugArrow, dom.debugBody);
 
 // ========== Init ==========
@@ -1447,6 +1624,7 @@ function init() {
   initSettingsUI();
   renderHistory();
   renderBlacklist();
+  renderFavorites();
   initApiKey();
 }
 

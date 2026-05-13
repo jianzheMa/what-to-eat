@@ -671,6 +671,7 @@ body {
     <button class="btn btn-secondary btn-sm" id="rerollBtn">🔄 换一个</button>
     <button class="btn btn-secondary btn-sm" id="blacklistBtn">🚫 拉黑这家</button>
     <button class="btn btn-secondary btn-sm" id="favResultBtn">⭐ 想去</button>
+    <button class="btn btn-secondary btn-sm" id="shareBtn">📤 分享</button>
   </div>
 
   <!-- Filter Settings -->
@@ -817,6 +818,7 @@ const dom = {
   favArrow: $('#favArrow'),
   favList: $('#favList'),
   favResultBtn: $('#favResultBtn'),
+  shareBtn: $('#shareBtn'),
   debugPanel: $('#debugPanel'),
   debugContent: $('#debugContent'),
   debugBody: $('#debugBody'),
@@ -1578,6 +1580,62 @@ dom.historyList.addEventListener('click', function(e) {
   window.scrollTo({ top: dom.resultCard.offsetTop - 20, behavior: 'smooth' });
 });
 
+// ========== Share ==========
+function shareResult() {
+  var r = state.currentResult;
+  if (!r) return;
+
+  // Handle multi-result: share all
+  var items = Array.isArray(r) ? r : [r];
+  var lines = ['🍽️ 今天吃什么？', ''];
+
+  items.forEach(function(item, i) {
+    if (items.length > 1) lines.push('【' + (i + 1) + '】');
+    lines.push(item.name);
+    var rating = getRating(item);
+    if (rating > 0) lines.push('评分：★' + rating.toFixed(1));
+    var dist = item.distance || 0;
+    if (dist > 0) lines.push('距离：' + formatDistance(dist));
+    var cost = getCost(item);
+    if (cost > 0) lines.push('人均：¥' + cost);
+    if (item.address) lines.push('地址：' + item.address);
+    var navUrl = getNavUrl(item);
+    if (navUrl) lines.push('导航：' + navUrl);
+    lines.push('');
+  });
+
+  lines.push('—— 今天吃什么 · 随机餐厅推荐');
+  var text = lines.join('\n');
+
+  if (navigator.share) {
+    navigator.share({ title: '今天吃什么？', text: text }).catch(function() {
+      copyToClipboard(text);
+    });
+  } else {
+    copyToClipboard(text);
+  }
+}
+
+function copyToClipboard(text) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function() {
+      showToast('已复制到剪贴板，去分享吧 📋');
+    }).catch(function() {
+      showToast('分享失败，请截图分享');
+    });
+  } else {
+    // Fallback for older browsers
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); showToast('已复制到剪贴板 📋'); } catch (e) { showToast('分享失败，请截图分享'); }
+    document.body.removeChild(ta);
+  }
+}
+
 // ========== Favorites ==========
 function isFavorite(id) {
   return favorites.some(function(f) { return f.id === id; });
@@ -1767,6 +1825,7 @@ dom.blacklistBtn.addEventListener('click', () => addToBlacklist(state.currentRes
 dom.favResultBtn.addEventListener('click', () => {
   if (state.currentResult) toggleFavorite(getFavData(state.currentResult));
 });
+dom.shareBtn.addEventListener('click', shareResult);
 dom.clearHistoryBtn.addEventListener('click', clearHistory);
 
 dom.ratingSlider.addEventListener('input', () => {

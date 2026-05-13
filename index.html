@@ -453,6 +453,16 @@ body {
   justify-content: center;
 }
 
+/* Result photo */
+.result-photo {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  margin-bottom: 12px;
+  background: #f5f5f4;
+}
+
 /* Mini map */
 .result-map {
   width: 100%;
@@ -1185,6 +1195,22 @@ function getCost(poi) {
   return isNaN(num) ? 0 : num;
 }
 
+function getPhotoUrl(poi) {
+  if (poi.photos && Array.isArray(poi.photos) && poi.photos.length > 0) {
+    var p = poi.photos[0];
+    return p.url || p;
+  }
+  if (poi.deep_info && poi.deep_info.photos && Array.isArray(poi.deep_info.photos) && poi.deep_info.photos.length > 0) {
+    var dp = poi.deep_info.photos[0];
+    return dp.url || dp;
+  }
+  if (poi.biz_ext && poi.biz_ext.photos && Array.isArray(poi.biz_ext.photos) && poi.biz_ext.photos.length > 0) {
+    var bp = poi.biz_ext.photos[0];
+    return bp.url || bp;
+  }
+  return null;
+}
+
 function getReviewCount(poi) {
   // Amap PlaceSearch doesn't return review count; use 0
   return 0;
@@ -1220,8 +1246,10 @@ function displayResult(restaurant) {
   var typeLabel = getTypeLabel(restaurant.type);
   var navUrl = getNavUrl(restaurant);
   var hasLocation = !!getPoiLocation(restaurant);
+  var photoUrl = getPhotoUrl(restaurant);
 
   dom.resultCard.innerHTML = `
+    ${photoUrl ? '<img class="result-photo" src="' + photoUrl + '" alt="' + escapeHtml(restaurant.name) + '" onerror="this.style.display=\'none\'">' : ''}
     <div class="result-name">${escapeHtml(restaurant.name)}</div>
     <div class="result-stars">
       ${renderStars(rating)}

@@ -817,7 +817,7 @@ body {
 (function() {
 'use strict';
 
-// ========== DOM refs ==========
+// DOM refs
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => document.querySelectorAll(sel);
 
@@ -877,7 +877,7 @@ function debugLog(label, data) {
   console.log(label, data);
 }
 
-// ========== Settings ==========
+// Settings
 const SETTINGS_KEY = 'eat_settings';
 const HISTORY_KEY = 'eat_history';
 const BLACKLIST_KEY = 'eat_blacklist';
@@ -906,12 +906,11 @@ function saveJSON(key, data) {
   try { localStorage.setItem(key, JSON.stringify(data)); } catch {}
 }
 
-// ========== State ==========
+// State
 let state = {
   position: null,          // { lng, lat }
-  allRestaurants: [],      // raw POI data
   candidates: [],          // after filtering (excluding blacklist & history)
-  shownThisRound: [],      // shown in current session (by id)
+  shownThisRound: new Set(), // ids shown in current session
   currentResult: null,     // currently displayed restaurant
   isSearching: false,
   sdkReady: false,
@@ -929,7 +928,7 @@ const SEVEN_DAYS = 7 * 24 * 3600 * 1000;
 history = history.filter(h => Date.now() - h.timestamp < SEVEN_DAYS);
 saveJSON(HISTORY_KEY, history);
 
-// ========== Helpers ==========
+// Helpers
 function showSpinner(text) {
   dom.spinnerText.textContent = text;
   dom.spinner.classList.remove('hidden');
@@ -972,7 +971,16 @@ function setLocationStatus(active, text) {
   dom.locationText.textContent = text;
 }
 
-// ========== API Key ==========
+function debounce(fn, ms) {
+  let timer;
+  return function() {
+    clearTimeout(timer);
+    timer = setTimeout(fn, ms);
+  };
+}
+const debouncedSaveSettings = debounce(function() { saveJSON(SETTINGS_KEY, settings); }, 150);
+
+// API Key
 function initApiKey() {
   // Pre-fill saved values
   dom.apiKeyInput.value = apiKey;
@@ -1021,7 +1029,7 @@ dom.saveApiKeyBtn.addEventListener('click', () => {
   loadAMapSDK(key, code);
 });
 
-// ========== AMap SDK ==========
+// AMap SDK
 function loadAMapSDK(key, secCode) {
   if (window.AMap && state.sdkReady) {
     initLocation();
@@ -1066,7 +1074,7 @@ function loadAMapSDK(key, secCode) {
   document.head.appendChild(script);
 }
 
-// ========== Geolocation ==========
+// Geolocation
 function initLocation() {
   setLocationStatus(false, '定位中...');
   dom.pickBtn.disabled = true;
@@ -1102,7 +1110,7 @@ function initLocation() {
   });
 }
 
-// ========== Search ==========
+// Search
 function searchRestaurants() {
   return new Promise((resolve) => {
     AMap.plugin(['AMap.PlaceSearch'], () => {
@@ -1156,97 +1164,70 @@ function searchRestaurants() {
   });
 }
 
-// ========== Filter Pipeline ==========
+// Filter Pipeline
 function filterRestaurants(pois) {
-  let filtered = pois.filter(poi => {
+  const blackIds = new Set(blacklist.map(b => b.id));
+  const historyIds = new Set(history.map(h => h.id));
+
+  return pois.filter(poi => {
     if (!poi.name) return false;
+    if (!(poi.type || '').includes('餐饮')) return false;
+    if (getRating(poi) < settings.minRating) return false;
+    if (settings.maxDistance > 0 && (poi.distance || 0) > settings.maxDistance) return false;
+    if (settings.maxPrice > 0 && getCost(poi) > settings.maxPrice) return false;
+    if (blackIds.has(poi.id) || historyIds.has(poi.id)) return false;
 
-    // Only keep 餐饮-related POIs
-    const poiType = poi.type || '';
-    if (!poiType.includes('餐饮')) return false;
-
-    // Rating filter
-    const rating = getRating(poi);
-    if (rating < settings.minRating) return false;
-
-    // Distance filter
-    const dist = poi.distance || 0;
-    if (settings.maxDistance > 0 && dist > settings.maxDistance) return false;
-
-    // Price filter
-    if (settings.maxPrice > 0) {
-      const cost = getCost(poi);
-      if (cost > settings.maxPrice) return false;
-    }
-
-    // Cuisine filter (client-side)
     if (settings.cuisines.length > 0) {
-      const types = (poi.type || '') + (poi.biz_ext?.type || '');
-      const name = poi.name || '';
-      const combined = types + name;
-      const matched = settings.cuisines.some(kw => combined.includes(kw));
-      if (!matched) return false;
+      const combined = (poi.type || '') + (poi.biz_ext?.type || '') + (poi.name || '');
+      if (!settings.cuisines.some(kw => combined.includes(kw))) return false;
     }
 
     return true;
   });
-
-  // Remove blacklisted
-  const blackIds = new Set(blacklist.map(b => b.id));
-  filtered = filtered.filter(p => !blackIds.has(p.id));
-
-  // Remove history (last 7 days)
-  const historyIds = new Set(history.map(h => h.id));
-  filtered = filtered.filter(p => !historyIds.has(p.id));
-
-  return filtered;
 }
 
-// ========== Pick Random ==========
+// Pick Random
 function pickRandom(candidates, count) {
   if (candidates.length === 0) return null;
-  count = count || 1;
-  // Create remaining pool (exclude shown this round)
-  var shownIds = new Set(state.shownThisRound.map(function(s) { return s.id; }));
-  var pool = candidates.filter(function(c) { return !shownIds.has(c.id); });
+  const actualCount = count || 1;
+  let pool = candidates.filter(function(c) { return !state.shownThisRound.has(c.id); });
   if (pool.length === 0) {
-    state.shownThisRound = [];
+    state.shownThisRound.clear();
     pool = candidates;
   }
-  if (pool.length < count) count = pool.length;
-  // Shuffle and pick first N
-  var shuffled = pool.slice().sort(function() { return Math.random() - 0.5; });
-  var picks = shuffled.slice(0, count);
-  picks.forEach(function(p) {
-    state.shownThisRound.push({ id: p.id, name: p.name });
-  });
-  return count === 1 ? picks[0] : picks;
+  const n = Math.min(pool.length, actualCount);
+  const shuffled = pool.slice().sort(function() { return Math.random() - 0.5; });
+  const picks = shuffled.slice(0, n);
+  picks.forEach(function(p) { state.shownThisRound.add(p.id); });
+  return actualCount === 1 ? picks[0] : picks;
 }
 
-// ========== Display ==========
+// Display
 function getRating(poi) {
+  if (poi._rating !== undefined) return poi._rating;
   const r = poi.rating || poi.biz_ext?.rating || poi.deep_info?.rating || '';
   const num = parseFloat(r);
-  return isNaN(num) ? 0 : num;
+  return (poi._rating = isNaN(num) ? 0 : num);
 }
 
 function getCost(poi) {
+  if (poi._cost !== undefined) return poi._cost;
   const c = poi.cost || poi.biz_ext?.cost || poi.deep_info?.cost || '';
   const num = parseFloat(c);
-  return isNaN(num) ? 0 : num;
+  return (poi._cost = isNaN(num) ? 0 : num);
 }
 
 function getPhotoUrl(poi) {
   if (poi.photos && Array.isArray(poi.photos) && poi.photos.length > 0) {
-    var p = poi.photos[0];
+    const p = poi.photos[0];
     return p.url || p;
   }
   if (poi.deep_info && poi.deep_info.photos && Array.isArray(poi.deep_info.photos) && poi.deep_info.photos.length > 0) {
-    var dp = poi.deep_info.photos[0];
+    const dp = poi.deep_info.photos[0];
     return dp.url || dp;
   }
   if (poi.biz_ext && poi.biz_ext.photos && Array.isArray(poi.biz_ext.photos) && poi.biz_ext.photos.length > 0) {
-    var bp = poi.biz_ext.photos[0];
+    const bp = poi.biz_ext.photos[0];
     return bp.url || bp;
   }
   return null;
@@ -1280,14 +1261,14 @@ function displayResult(restaurant) {
   }
 
   dom.resultCard.classList.add('has-result');
-  var rating = getRating(restaurant);
-  var cost = getCost(restaurant);
-  var reviewCount = getReviewCount(restaurant);
-  var dist = restaurant.distance || 0;
-  var typeLabel = getTypeLabel(restaurant.type);
-  var navUrl = getNavUrl(restaurant);
-  var hasLocation = !!getPoiLocation(restaurant);
-  var photoUrl = getPhotoUrl(restaurant);
+  const rating = getRating(restaurant);
+  const cost = getCost(restaurant);
+  const reviewCount = getReviewCount(restaurant);
+  const dist = restaurant.distance || 0;
+  const typeLabel = getTypeLabel(restaurant.type);
+  const navUrl = getNavUrl(restaurant);
+  const hasLocation = !!getPoiLocation(restaurant);
+  const photoUrl = getPhotoUrl(restaurant);
 
   dom.resultCard.innerHTML = `
     ${photoUrl ? '<img class="result-photo" src="' + photoUrl + '" alt="' + escapeHtml(restaurant.name) + '" loading="lazy" onerror="this.style.display=\'none\'">' : ''}
@@ -1310,9 +1291,8 @@ function displayResult(restaurant) {
   dom.resultActions.classList.remove('hidden');
   updateFavResultBtn();
 
-  // Render mini map if location available
   if (hasLocation) {
-    var mapContainer = document.getElementById('miniMapContainer');
+    const mapContainer = document.getElementById('miniMapContainer');
     if (mapContainer) {
       setTimeout(function() { renderMiniMap(mapContainer, restaurant); }, 100);
     }
@@ -1321,14 +1301,14 @@ function displayResult(restaurant) {
 
 function displayMultiResult(restaurants) {
   dom.resultCard.classList.add('has-result');
-  var html = '<div style="text-align:center;font-weight:700;margin-bottom:12px;font-size:18px;">🎯 为你选出 ' + restaurants.length + ' 家</div>';
+  let html = '<div style="text-align:center;font-weight:700;margin-bottom:12px;font-size:18px;">🎯 为你选出 ' + restaurants.length + ' 家</div>';
   html += restaurants.map(function(r, i) {
-    var rating = getRating(r);
-    var cost = getCost(r);
-    var dist = r.distance || 0;
-    var typeLabel = getTypeLabel(r.type);
-    var navUrl = getNavUrl(r);
-    var starsHtml = rating > 0 ? '<span style="color:#f59e0b;">★ ' + rating.toFixed(1) + '</span>' : '';
+    const rating = getRating(r);
+    const cost = getCost(r);
+    const dist = r.distance || 0;
+    const typeLabel = getTypeLabel(r.type);
+    const navUrl = getNavUrl(r);
+    const starsHtml = rating > 0 ? '<span style="color:#f59e0b;">★ ' + rating.toFixed(1) + '</span>' : '';
     return '<div class="multi-result-item">' +
       '<div class="mr-header">' +
         '<span class="mr-name">' + (i + 1) + '. ' + escapeHtml(r.name) + '</span>' +
@@ -1349,14 +1329,12 @@ function displayMultiResult(restaurants) {
   dom.resultCard.innerHTML = html;
   dom.resultActions.classList.remove('hidden');
 
-  // Bind blacklist buttons in multi-result
   setTimeout(function() {
     dom.resultCard.querySelectorAll('.mr-blacklist').forEach(function(btn) {
       btn.addEventListener('click', function() {
-        var idx = parseInt(btn.dataset.mrIdx);
+        const idx = parseInt(btn.dataset.mrIdx);
         if (state.currentResult && Array.isArray(state.currentResult) && state.currentResult[idx]) {
           addToBlacklist(state.currentResult[idx]);
-          // Remove from array and re-render
           state.currentResult.splice(idx, 1);
           if (state.currentResult.length === 0) {
             displayResult(null);
@@ -1369,24 +1347,34 @@ function displayMultiResult(restaurants) {
   }, 50);
 }
 
+const _escapeDiv = document.createElement('div');
 function escapeHtml(str) {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
+  _escapeDiv.textContent = str;
+  return _escapeDiv.innerHTML;
 }
 
-// ========== Mini Map & Navigation ==========
+function renderMetaChips(item, opts) {
+  const chips = [];
+  if (item.rating > 0) chips.push('<span style="color:#f59e0b;">★ ' + item.rating.toFixed(1) + '</span>');
+  if (item.distance > 0) chips.push('<span>📍 ' + formatDistance(item.distance) + '</span>');
+  if (item.cost > 0) chips.push('<span>💰 ¥' + item.cost + '</span>');
+  if (item.typeLabel) chips.push('<span style="color:#f97316;">' + escapeHtml(item.typeLabel) + '</span>');
+  if (opts && opts.showPickCount && item.pickCount > 1) chips.push('<span>🎲 ' + item.pickCount + '次</span>');
+  return chips.join('');
+}
+
+// Mini Map & Navigation
 function getPoiLocation(poi) {
   if (!poi || !poi.location) return null;
-  var loc = poi.location;
-  var lng = typeof loc.lng === 'number' ? loc.lng : (typeof loc.getLng === 'function' ? loc.getLng() : null);
-  var lat = typeof loc.lat === 'number' ? loc.lat : (typeof loc.getLat === 'function' ? loc.getLat() : null);
+  const loc = poi.location;
+  const lng = typeof loc.lng === 'number' ? loc.lng : (typeof loc.getLng === 'function' ? loc.getLng() : null);
+  const lat = typeof loc.lat === 'number' ? loc.lat : (typeof loc.getLat === 'function' ? loc.getLat() : null);
   if (lng == null || lat == null) return null;
   return { lng: lng, lat: lat };
 }
 
 function getNavUrl(poi) {
-  var loc = getPoiLocation(poi);
+  const loc = getPoiLocation(poi);
   if (!loc) return null;
   return 'https://uri.amap.com/navigation?to=' + loc.lng + ',' + loc.lat + ',' + encodeURIComponent(poi.name) + '&mode=car&callnative=1';
 }
@@ -1400,10 +1388,10 @@ function destroyMiniMap() {
 
 function renderMiniMap(container, poi) {
   destroyMiniMap();
-  var loc = getPoiLocation(poi);
+  const loc = getPoiLocation(poi);
   if (!loc || !window.AMap) return;
 
-  var map = new AMap.Map(container, {
+  const map = new AMap.Map(container, {
     zoom: 16,
     center: [loc.lng, loc.lat],
     resizeEnable: true,
@@ -1415,7 +1403,7 @@ function renderMiniMap(container, poi) {
     showBuildingBlock: true,
   });
 
-  var marker = new AMap.Marker({
+  const marker = new AMap.Marker({
     position: [loc.lng, loc.lat],
     title: poi.name,
     anchor: 'center',
@@ -1425,7 +1413,7 @@ function renderMiniMap(container, poi) {
   state.miniMap = map;
 }
 
-// ========== Main Action ==========
+// Main Action
 async function doPick() {
   if (state.isSearching) return;
   if (!state.position) {
@@ -1438,7 +1426,6 @@ async function doPick() {
   destroyMiniMap();
   showSpinner('正在搜索周边餐厅...');
   dom.resultCard.classList.remove('has-result');
-  dom.resultCard.innerHTML = '<div class="result-empty"><p>搜索中...</p></div>';
   dom.resultActions.classList.add('hidden');
 
   try {
@@ -1451,11 +1438,7 @@ async function doPick() {
       showToast('附近没搜到餐厅，试试扩大距离');
     } else {
       debugLog('搜索原始结果', `${pois.length} 条`);
-      state.allRestaurants = pois;
-      state.shownThisRound = [];
-      // Sync settings from current UI state before filtering
-      settings.minRating = parseFloat(dom.ratingSlider.value) || 0;
-      settings.maxDistance = parseInt(dom.distanceSlider.value) || 5000;
+      state.shownThisRound.clear();
       state.candidates = filterRestaurants(pois);
       debugLog('筛选后结果', `${state.candidates.length} 条 (原始${pois.length}条, 设置: 评分≥${settings.minRating}, 距离≤${settings.maxDistance}m, 价格≤${settings.maxPrice}, 菜系: ${settings.cuisines.join(',') || '不限'})`);
 
@@ -1469,7 +1452,7 @@ async function doPick() {
           showToast('筛选后无结果，请放宽条件');
         }
       } else {
-        var pick = pickRandom(state.candidates, settings.pickCount);
+        const pick = pickRandom(state.candidates, settings.pickCount);
         displayResult(pick);
         if (Array.isArray(pick)) {
           pick.forEach(function(p) { addToHistory(p); });
@@ -1495,7 +1478,7 @@ function reroll() {
     showToast('没有更多候选了，请重新搜索');
     return;
   }
-  var pick = pickRandom(state.candidates, settings.pickCount);
+  const pick = pickRandom(state.candidates, settings.pickCount);
   if (pick) {
     displayResult(pick);
     if (Array.isArray(pick)) {
@@ -1524,26 +1507,12 @@ function addToBlacklist(restaurant) {
   reroll();
 }
 
-// ========== History ==========
+// History
 function addToHistory(restaurant) {
   if (!restaurant) return;
-  var data = {
-    id: restaurant.id,
-    name: restaurant.name,
-    timestamp: Date.now(),
-    rating: getRating(restaurant),
-    distance: restaurant.distance || 0,
-    cost: getCost(restaurant),
-    typeLabel: getTypeLabel(restaurant.type),
-    address: restaurant.address || '',
-    location: getPoiLocation(restaurant),
-  };
-  var existing = history.find(function(h) { return h.id === restaurant.id; });
-  if (existing) {
-    data.pickCount = (existing.pickCount || 1) + 1;
-  } else {
-    data.pickCount = 1;
-  }
+  const data = Object.assign(getFavData(restaurant), { timestamp: Date.now() });
+  const existing = history.find(function(h) { return h.id === restaurant.id; });
+  data.pickCount = existing ? (existing.pickCount || 1) + 1 : 1;
   history = history.filter(function(h) { return h.id !== restaurant.id; });
   history.unshift(data);
   history = history.filter(function(h) { return Date.now() - h.timestamp < SEVEN_DAYS; });
@@ -1552,24 +1521,20 @@ function addToHistory(restaurant) {
 }
 
 function renderHistory() {
-  var recent = history.filter(function(h) { return Date.now() - h.timestamp < SEVEN_DAYS; });
+  const recent = history.filter(function(h) { return Date.now() - h.timestamp < SEVEN_DAYS; });
   if (recent.length === 0) {
     dom.historyList.innerHTML = '<div class="list-empty">暂无记录</div>';
     dom.clearHistoryBtn.classList.add('hidden');
     return;
   }
   dom.clearHistoryBtn.classList.remove('hidden');
+  const favIds = new Set(favorites.map(function(f) { return f.id; }));
   dom.historyList.innerHTML = recent.map(function(h, idx) {
-    var starsHtml = h.rating > 0 ? '<span style="color:#f59e0b;">★ ' + h.rating.toFixed(1) + '</span>' : '';
-    var distHtml = h.distance > 0 ? '<span>📍 ' + formatDistance(h.distance) + '</span>' : '';
-    var costHtml = h.cost > 0 ? '<span>💰 ¥' + h.cost + '</span>' : '';
-    var typeHtml = h.typeLabel ? '<span style="color:#f97316;">' + escapeHtml(h.typeLabel) + '</span>' : '';
-    var countHtml = h.pickCount > 1 ? '<span>🎲 ' + h.pickCount + '次</span>' : '';
-    var faved = isFavorite(h.id);
+    const faved = favIds.has(h.id);
     return '<div class="list-item" data-idx="' + idx + '">' +
       '<div class="info">' +
         '<div class="name">' + escapeHtml(h.name) + '</div>' +
-        '<div class="meta">' + [starsHtml, distHtml, costHtml, typeHtml, countHtml].filter(Boolean).join('') + '</div>' +
+        '<div class="meta">' + renderMetaChips(h, { showPickCount: true }) + '</div>' +
         '<div class="date">' + new Date(h.timestamp).toLocaleDateString('zh-CN') + '</div>' +
       '</div>' +
       '<div class="item-actions">' +
@@ -1600,51 +1565,47 @@ function clearHistory() {
 
 // Click handler for history items (delegated: click row or fav button)
 dom.historyList.addEventListener('click', function(e) {
-  var item = e.target.closest('.list-item');
+  const item = e.target.closest('.list-item');
   if (!item) return;
-  var idx = parseInt(item.dataset.idx);
-  var recent = history.filter(function(h) { return Date.now() - h.timestamp < SEVEN_DAYS; });
-  var entry = recent[idx];
+  const idx = parseInt(item.dataset.idx);
+  const entry = history[idx];
   if (!entry) return;
 
-  // Fav button click
   if (e.target.closest('.fav-btn')) {
     e.stopPropagation();
     toggleFavorite(entry);
     return;
   }
 
-  // Row click — re-display
   displayResult(historyToRestaurant(entry));
   window.scrollTo({ top: dom.resultCard.offsetTop - 20, behavior: 'smooth' });
 });
 
-// ========== Share ==========
+// Share
 function shareResult() {
-  var r = state.currentResult;
+  const r = state.currentResult;
   if (!r) return;
 
-  // Handle multi-result: share all
-  var items = Array.isArray(r) ? r : [r];
-  var lines = ['🍽️ 今天吃什么？', ''];
+  const items = Array.isArray(r) ? r : [r];
+  const lines = ['🍽️ 今天吃什么？', ''];
 
   items.forEach(function(item, i) {
     if (items.length > 1) lines.push('【' + (i + 1) + '】');
     lines.push(item.name);
-    var rating = getRating(item);
+    const rating = getRating(item);
     if (rating > 0) lines.push('评分：★' + rating.toFixed(1));
-    var dist = item.distance || 0;
+    const dist = item.distance || 0;
     if (dist > 0) lines.push('距离：' + formatDistance(dist));
-    var cost = getCost(item);
+    const cost = getCost(item);
     if (cost > 0) lines.push('人均：¥' + cost);
     if (item.address) lines.push('地址：' + item.address);
-    var navUrl = getNavUrl(item);
+    const navUrl = getNavUrl(item);
     if (navUrl) lines.push('导航：' + navUrl);
     lines.push('');
   });
 
   lines.push('—— 今天吃什么 · 随机餐厅推荐');
-  var text = lines.join('\n');
+  const text = lines.join('\n');
 
   if (navigator.share) {
     navigator.share({ title: '今天吃什么？', text: text }).catch(function() {
@@ -1663,8 +1624,7 @@ function copyToClipboard(text) {
       showToast('分享失败，请截图分享');
     });
   } else {
-    // Fallback for older browsers
-    var ta = document.createElement('textarea');
+    const ta = document.createElement('textarea');
     ta.value = text;
     ta.style.position = 'fixed';
     ta.style.left = '-9999px';
@@ -1675,7 +1635,7 @@ function copyToClipboard(text) {
   }
 }
 
-// ========== Favorites ==========
+// Favorites
 function isFavorite(id) {
   return favorites.some(function(f) { return f.id === id; });
 }
@@ -1735,14 +1695,10 @@ function renderFavorites() {
     return;
   }
   dom.favList.innerHTML = favorites.map(function(f, idx) {
-    var starsHtml = f.rating > 0 ? '<span style="color:#f59e0b;">★ ' + f.rating.toFixed(1) + '</span>' : '';
-    var distHtml = f.distance > 0 ? '<span>📍 ' + formatDistance(f.distance) + '</span>' : '';
-    var costHtml = f.cost > 0 ? '<span>💰 ¥' + f.cost + '</span>' : '';
-    var typeHtml = f.typeLabel ? '<span style="color:#f97316;">' + escapeHtml(f.typeLabel) + '</span>' : '';
     return '<div class="list-item" data-idx="' + idx + '">' +
       '<div class="info">' +
         '<div class="name">' + escapeHtml(f.name) + '</div>' +
-        '<div class="meta">' + [starsHtml, distHtml, costHtml, typeHtml].filter(Boolean).join('') + '</div>' +
+        '<div class="meta">' + renderMetaChips(f, {}) + '</div>' +
       '</div>' +
       '<div class="item-actions">' +
         '<button class="fav-btn faved" data-fav-idx="' + idx + '">★</button>' +
@@ -1750,49 +1706,37 @@ function renderFavorites() {
       '</div>' +
     '</div>';
   }).join('');
-
-  // Bind fav toggle buttons in favorites list
-  dom.favList.querySelectorAll('.fav-btn').forEach(function(btn) {
-    btn.addEventListener('click', function(e) {
-      e.stopPropagation();
-      var fi = parseInt(btn.dataset.favIdx);
-      var entry = favorites[fi];
-      if (entry) toggleFavorite(entry);
-    });
-  });
-
-  // Bind remove buttons in favorites list
-  dom.favList.querySelectorAll('.remove-btn').forEach(function(btn) {
-    btn.addEventListener('click', function(e) {
-      e.stopPropagation();
-      var fi = parseInt(btn.dataset.favIdx);
-      var entry = favorites[fi];
-      if (entry) {
-        favorites = favorites.filter(function(f) { return f.id !== entry.id; });
-        saveJSON(FAVORITES_KEY, favorites);
-        renderFavorites();
-        renderHistory();
-        updateFavResultBtn();
-        showToast('已移除「' + entry.name + '」');
-      }
-    });
-  });
 }
 
-// Click handler for favorites list
+// Click handler for favorites list (delegated: row, fav, remove)
 dom.favList.addEventListener('click', function(e) {
-  var item = e.target.closest('.list-item');
+  const item = e.target.closest('.list-item');
   if (!item) return;
-  if (e.target.closest('.fav-btn') || e.target.closest('.remove-btn')) return;
-  var idx = parseInt(item.dataset.idx);
-  var entry = favorites[idx];
-  if (entry) {
-    displayResult(historyToRestaurant(entry));
-    window.scrollTo({ top: dom.resultCard.offsetTop - 20, behavior: 'smooth' });
+  const idx = parseInt(item.dataset.idx);
+  const entry = favorites[idx];
+  if (!entry) return;
+
+  if (e.target.closest('.fav-btn')) {
+    e.stopPropagation();
+    toggleFavorite(entry);
+    return;
   }
+  if (e.target.closest('.remove-btn')) {
+    e.stopPropagation();
+    favorites = favorites.filter(function(f) { return f.id !== entry.id; });
+    saveJSON(FAVORITES_KEY, favorites);
+    renderFavorites();
+    renderHistory();
+    updateFavResultBtn();
+    showToast('已移除「' + entry.name + '」');
+    return;
+  }
+
+  displayResult(historyToRestaurant(entry));
+  window.scrollTo({ top: dom.resultCard.offsetTop - 20, behavior: 'smooth' });
 });
 
-// ========== Blacklist ==========
+// Blacklist
 function renderBlacklist() {
   if (blacklist.length === 0) {
     dom.blacklistList.innerHTML = '<div class="list-empty">暂无拉黑</div>';
@@ -1820,7 +1764,7 @@ function renderBlacklist() {
   });
 }
 
-// ========== Settings UI ==========
+// Settings UI
 function initSettingsUI() {
   dom.ratingSlider.value = settings.minRating;
   dom.ratingValue.textContent = settings.minRating.toFixed(1);
@@ -1843,18 +1787,14 @@ function initSettingsUI() {
   });
 }
 
-function updateSettings() {
-  saveJSON(SETTINGS_KEY, settings);
-}
-
-// ========== Event Bindings ==========
+// Event Bindings
 // Pick count buttons
 $$('.pick-count-btn').forEach(function(btn) {
   btn.addEventListener('click', function() {
     $$('.pick-count-btn').forEach(function(b) { b.classList.remove('active'); });
     btn.classList.add('active');
     settings.pickCount = parseInt(btn.dataset.count);
-    updateSettings();
+    debouncedSaveSettings();
   });
 });
 
@@ -1870,13 +1810,13 @@ dom.clearHistoryBtn.addEventListener('click', clearHistory);
 dom.ratingSlider.addEventListener('input', () => {
   settings.minRating = parseFloat(dom.ratingSlider.value);
   dom.ratingValue.textContent = settings.minRating.toFixed(1);
-  updateSettings();
+  debouncedSaveSettings();
 });
 
 dom.distanceSlider.addEventListener('input', () => {
   settings.maxDistance = parseInt(dom.distanceSlider.value);
   dom.distanceValue.textContent = formatDistance(settings.maxDistance);
-  updateSettings();
+  debouncedSaveSettings();
 });
 
 dom.priceOptions.addEventListener('click', (e) => {
@@ -1886,7 +1826,7 @@ dom.priceOptions.addEventListener('click', (e) => {
   settings.maxPrice = val === settings.maxPrice ? 0 : val;
   dom.priceOptions.querySelectorAll('.price-chip').forEach(c => c.classList.remove('active'));
   if (settings.maxPrice > 0) chip.classList.add('active');
-  updateSettings();
+  debouncedSaveSettings();
 });
 
 dom.cuisineTags.addEventListener('click', (e) => {
@@ -1902,7 +1842,7 @@ dom.cuisineTags.addEventListener('click', (e) => {
     tag.classList.add('active');
   }
   dom.cuisineHint.textContent = settings.cuisines.length > 0 ? `已选 ${settings.cuisines.length} 项` : '不选则不限';
-  updateSettings();
+  debouncedSaveSettings();
 });
 
 // Collapsible sections
@@ -1933,7 +1873,7 @@ bindCollapse($('#blacklistHeader'), dom.blacklistArrow, dom.blacklistBody);
 bindCollapse($('#favHeader'), dom.favArrow, dom.favBody);
 bindCollapse($('#debugHeader'), dom.debugArrow, dom.debugBody);
 
-// ========== Init ==========
+// Init
 function init() {
   initSettingsUI();
   renderHistory();

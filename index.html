@@ -291,7 +291,90 @@ body {
   border-radius: var(--radius-sm);
 }
 
-/* Result card */
+/* Pick count */
+.pick-count-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.pick-count-row .label { font-size: 13px; color: var(--text-secondary); }
+.pick-count-btn {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: var(--card);
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.pick-count-btn.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+.pick-count-btn:hover:not(.active) { border-color: var(--primary); }
+
+/* Multi-result item */
+.multi-result-item {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+.multi-result-item:last-child { border-bottom: none; }
+.multi-result-item .mr-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+.multi-result-item .mr-name {
+  font-size: 16px;
+  font-weight: 700;
+  flex: 1;
+}
+.multi-result-item .mr-stars {
+  font-size: 13px;
+  color: var(--star);
+  white-space: nowrap;
+}
+.multi-result-item .mr-meta {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.multi-result-item .mr-address {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+.multi-result-item .mr-actions {
+  margin-top: 6px;
+  display: flex;
+  gap: 6px;
+}
+.multi-result-item .mr-nav {
+  font-size: 12px;
+  color: #1677ff;
+  text-decoration: none;
+  font-weight: 600;
+}
+.multi-result-item .mr-blacklist {
+  font-size: 12px;
+  color: var(--danger);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+}
 .result-card {
   background: var(--card);
   border-radius: var(--radius);
@@ -552,6 +635,14 @@ body {
     <p style="font-size:11px;color:var(--text-secondary);margin-top:8px;text-align:center;" id="apiKeyStatus"></p>
   </div>
 
+  <!-- Pick Count -->
+  <div class="pick-count-row">
+    <span class="label">抽几家：</span>
+    <button class="pick-count-btn active" data-count="1">1</button>
+    <button class="pick-count-btn" data-count="2">2</button>
+    <button class="pick-count-btn" data-count="3">3</button>
+  </div>
+
   <!-- Main Button -->
   <div class="btn-row">
     <button class="btn btn-primary" id="pickBtn" disabled>🎲 随便吃点</button>
@@ -748,6 +839,7 @@ const DEFAULT_SETTINGS = {
   maxDistance: 3000,
   maxPrice: 0,
   cuisines: [],
+  pickCount: 1,
 };
 
 const CUISINE_KEYWORDS = ['火锅','川菜','日料','韩餐','烧烤','西餐','快餐','面馆','小吃','湘菜','粤菜','东北菜'];
@@ -1060,20 +1152,24 @@ function filterRestaurants(pois) {
 }
 
 // ========== Pick Random ==========
-function pickRandom(candidates) {
+function pickRandom(candidates, count) {
   if (candidates.length === 0) return null;
+  count = count || 1;
   // Create remaining pool (exclude shown this round)
-  const shownIds = new Set(state.shownThisRound.map(s => s.id));
-  let pool = candidates.filter(c => !shownIds.has(c.id));
+  var shownIds = new Set(state.shownThisRound.map(function(s) { return s.id; }));
+  var pool = candidates.filter(function(c) { return !shownIds.has(c.id); });
   if (pool.length === 0) {
-    // All shown, reset the round
     state.shownThisRound = [];
     pool = candidates;
   }
-  const idx = Math.floor(Math.random() * pool.length);
-  const pick = pool[idx];
-  state.shownThisRound.push({ id: pick.id, name: pick.name });
-  return pick;
+  if (pool.length < count) count = pool.length;
+  // Shuffle and pick first N
+  var shuffled = pool.slice().sort(function() { return Math.random() - 0.5; });
+  var picks = shuffled.slice(0, count);
+  picks.forEach(function(p) {
+    state.shownThisRound.push({ id: p.id, name: p.name });
+  });
+  return count === 1 ? picks[0] : picks;
 }
 
 // ========== Display ==========
@@ -1107,6 +1203,12 @@ function displayResult(restaurant) {
         <p style="font-size:12px;margin-top:4px;">试试放宽筛选条件或扩大搜索范围</p>
       </div>`;
     dom.resultActions.classList.add('hidden');
+    return;
+  }
+
+  // Multi-pick mode
+  if (Array.isArray(restaurant)) {
+    displayMultiResult(restaurant);
     return;
   }
 
@@ -1146,6 +1248,56 @@ function displayResult(restaurant) {
       setTimeout(function() { renderMiniMap(mapContainer, restaurant); }, 100);
     }
   }
+}
+
+function displayMultiResult(restaurants) {
+  dom.resultCard.classList.add('has-result');
+  var html = '<div style="text-align:center;font-weight:700;margin-bottom:12px;font-size:18px;">🎯 为你选出 ' + restaurants.length + ' 家</div>';
+  html += restaurants.map(function(r, i) {
+    var rating = getRating(r);
+    var cost = getCost(r);
+    var dist = r.distance || 0;
+    var typeLabel = getTypeLabel(r.type);
+    var navUrl = getNavUrl(r);
+    var starsHtml = rating > 0 ? '<span style="color:#f59e0b;">★ ' + rating.toFixed(1) + '</span>' : '';
+    return '<div class="multi-result-item">' +
+      '<div class="mr-header">' +
+        '<span class="mr-name">' + (i + 1) + '. ' + escapeHtml(r.name) + '</span>' +
+        (starsHtml ? '<span class="mr-stars">' + starsHtml + '</span>' : '') +
+      '</div>' +
+      '<div class="mr-meta">' +
+        (dist > 0 ? '<span>📍 ' + formatDistance(dist) + '</span>' : '') +
+        (cost > 0 ? '<span>💰 人均 ¥' + cost + '</span>' : '') +
+        (typeLabel ? '<span style="color:#f97316;">' + escapeHtml(typeLabel) + '</span>' : '') +
+      '</div>' +
+      (r.address ? '<div class="mr-address">' + escapeHtml(r.address) + '</div>' : '') +
+      '<div class="mr-actions">' +
+        (navUrl ? '<a class="mr-nav" href="' + navUrl + '" target="_blank" rel="noopener">🧭 导航</a>' : '') +
+        '<button class="mr-blacklist" data-mr-idx="' + i + '">🚫 拉黑</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+  dom.resultCard.innerHTML = html;
+  dom.resultActions.classList.remove('hidden');
+
+  // Bind blacklist buttons in multi-result
+  setTimeout(function() {
+    dom.resultCard.querySelectorAll('.mr-blacklist').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var idx = parseInt(btn.dataset.mrIdx);
+        if (state.currentResult && Array.isArray(state.currentResult) && state.currentResult[idx]) {
+          addToBlacklist(state.currentResult[idx]);
+          // Remove from array and re-render
+          state.currentResult.splice(idx, 1);
+          if (state.currentResult.length === 0) {
+            displayResult(null);
+          } else {
+            displayMultiResult(state.currentResult);
+          }
+        }
+      });
+    });
+  }, 50);
 }
 
 function escapeHtml(str) {
@@ -1248,10 +1400,13 @@ async function doPick() {
           showToast('筛选后无结果，请放宽条件');
         }
       } else {
-        const pick = pickRandom(state.candidates);
+        var pick = pickRandom(state.candidates, settings.pickCount);
         displayResult(pick);
-        // Add to history
-        addToHistory(pick);
+        if (Array.isArray(pick)) {
+          pick.forEach(function(p) { addToHistory(p); });
+        } else {
+          addToHistory(pick);
+        }
         renderHistory();
       }
     }
@@ -1271,10 +1426,14 @@ function reroll() {
     showToast('没有更多候选了，请重新搜索');
     return;
   }
-  const pick = pickRandom(state.candidates);
+  var pick = pickRandom(state.candidates, settings.pickCount);
   if (pick) {
     displayResult(pick);
-    addToHistory(pick);
+    if (Array.isArray(pick)) {
+      pick.forEach(function(p) { addToHistory(p); });
+    } else {
+      addToHistory(pick);
+    }
     renderHistory();
   }
 }
@@ -1552,6 +1711,11 @@ function initSettingsUI() {
   dom.cuisineTags.querySelectorAll('.cuisine-tag').forEach(tag => {
     tag.classList.toggle('active', settings.cuisines.includes(tag.dataset.keyword));
   });
+
+  // Pick count buttons
+  $$('.pick-count-btn').forEach(function(btn) {
+    btn.classList.toggle('active', parseInt(btn.dataset.count) === settings.pickCount);
+  });
 }
 
 function updateSettings() {
@@ -1559,6 +1723,16 @@ function updateSettings() {
 }
 
 // ========== Event Bindings ==========
+// Pick count buttons
+$$('.pick-count-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    $$('.pick-count-btn').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    settings.pickCount = parseInt(btn.dataset.count);
+    updateSettings();
+  });
+});
+
 dom.pickBtn.addEventListener('click', doPick);
 dom.rerollBtn.addEventListener('click', reroll);
 dom.blacklistBtn.addEventListener('click', () => addToBlacklist(state.currentResult));

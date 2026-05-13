@@ -626,7 +626,7 @@ body {
   <div class="footer">Powered by 高德地图 · 数据仅供参考</div>
 
   <!-- Debug Panel -->
-  <div class="section hidden" id="debugPanel">
+  <div class="section" id="debugPanel">
     <div class="section-header" id="debugHeader">
       <h2>🔧 调试信息</h2>
       <span class="arrow" id="debugArrow">▼</span>
@@ -700,10 +700,6 @@ function debugLog(label, data) {
     dom.debugBody.scrollTop = dom.debugBody.scrollHeight;
   }
   console.log(label, data);
-  // Show debug panel and auto-expand it
-  dom.debugPanel.classList.remove('hidden');
-  dom.debugBody.classList.add('open');
-  dom.debugArrow.classList.add('open');
 }
 
 // ========== Settings ==========

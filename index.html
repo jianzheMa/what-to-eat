@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>今天吃什么 — 食神占卜</title>
+<title>今天吃什么 - 食神占卜</title>
 <meta name="description" content="不知道吃什么？掷筊问食神，让天意帮你决定。基于高德地图随机推荐附近餐厅，支持评分/距离/价格筛选，一键导航。">
-<meta name="theme-color" content="#0d0b08">
+<meta name="theme-color" content="#060708">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="食神占卜">
@@ -18,122 +18,167 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="dns-prefetch" href="https://webapi.amap.com">
 <link rel="dns-prefetch" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@300;400;600;700&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
 <style>
 /* ============================================
-   食神占卜 — 庙堂占卜美学
-   设计基因: 宣纸 · 水墨 · 甲骨 · 金箔 · 朱砂
+   食神占卜 - Jade Nocturne
+   Design tokens: 玄夜 · 玉 · 骨白 · 朱砂
    ============================================ */
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --ink-deep: #0a0705;
-  --ink: #14100d;
-  --ink-wash: #1e1814;
-  --ink-light: #2c2420;
+  /* Nocturne backgrounds */
+  --bg-deep: #060708;
+  --bg-base: #0c0e10;
+  --bg-surface: #14171c;
+  --bg-elevated: #1c1f27;
+  --bg-hover: #1f222b;
 
-  --paper: #faf3e6;
-  --paper-dim: #efe4d0;
-  --paper-dark: #d4c0a0;
+  /* Bone card */
+  --card-bg: #f4f0e6;
+  --card-bg-warm: #f8f4ec;
+  --card-border: #e2dcd0;
+  --card-shadow: rgba(0,0,0,0.25);
 
-  --gold: #d4b96a;
-  --gold-bright: #e8cd7a;
-  --gold-pale: #b8963e;
-  --gold-glow: rgba(212, 185, 106, 0.4);
+  /* Jade accent - primary */
+  --jade: #4db88d;
+  --jade-bright: #5ecb9c;
+  --jade-deep: #3a9e72;
+  --jade-muted: #2d7a58;
+  --jade-glow: rgba(77,184,141,0.25);
+  --jade-soft: rgba(77,184,141,0.08);
 
-  --vermillion: #d44030;
-  --vermillion-bright: #e84c3c;
-  --vermillion-dark: #a02018;
-  --vermillion-glow: rgba(212, 64, 48, 0.35);
+  /* Amber - warm secondary */
+  --amber: #d4953a;
+  --amber-glow: rgba(212,149,58,0.2);
 
-  --ink-text: #1a1008;
-  --ink-text-dim: #3d3020;
-  --ink-text-muted: #6b5a48;
+  /* Cinnabar - danger */
+  --cinnabar: #c44a3f;
+  --cinnabar-bright: #d4584d;
+  --cinnabar-glow: rgba(196,74,63,0.2);
 
-  --text: #f5efe0;
-  --text-dim: #d4cdb8;
-  --text-muted: #b0a590;
-  --text-faint: #8a7e6e;
+  /* Text on dark bg */
+  --text: #ebe6dc;
+  --text-dim: #b5afa3;
+  --text-muted: #827c72;
+  --text-faint: #5c5850;
 
-  --border-ink: #332c24;
-  --border-paper: #d4c0a0;
-  --border-gold: rgba(212, 185, 106, 0.5);
+  /* Text on bone card */
+  --card-text: #1a1814;
+  --card-text-dim: #5c5850;
+  --card-text-muted: #8a8478;
 
-  --star: #d4b96a;
-  --danger: #d44030;
-  --success: #7aac90;
+  /* Borders */
+  --border-subtle: #22252d;
+  --border-medium: #333840;
+  --border-jade: rgba(77,184,141,0.35);
 
+  /* Stars / rating - reference parent tokens */
+  --star: var(--amber);
+  --success: var(--jade);
+  --danger: var(--cinnabar);
+
+  /* Typography */
   --font-oracle: 'Ma Shan Zheng', 'KaiTi', 'STKaiti', cursive;
   --font-verdict: 'ZCOOL XiaoWei', 'KaiTi', 'STKaiti', serif;
-  --font-body: 'Noto Serif SC', 'PingFang SC', 'Microsoft YaHei', serif;
+  --font-ui: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
+
+  /* Radii - consistent system: all-soft */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-full: 999px;
+
+  /* Font weight spectrum */
+  --weight-light: 300;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --weight-heavy: 800;
+
+  /* Tinted shadows for bone card */
+  --shadow-bone-sm: 0 2px 12px rgba(0,0,0,0.20), 0 1px 3px rgba(77,184,141,0.04);
+  --shadow-bone-md: 0 6px 32px rgba(0,0,0,0.35), 0 2px 8px rgba(77,184,141,0.06);
+  --shadow-bone-lg: 0 12px 48px rgba(0,0,0,0.45), 0 4px 16px rgba(77,184,141,0.08);
+
+  /* Glass surface tokens */
+  --glass-bg: rgba(20,23,28,0.55);
+  --glass-border: rgba(77,184,141,0.1);
+  --glass-blur: 16px;
+
+  /* Typographic scale (rem-based) */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-md: 1.125rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 2rem;
+  --text-3xl: 2.5rem;
+  --text-4xl: 3.5rem;
+
+  /* Letter-spacing scale (em-based) */
+  --ls-tight: 0.02em;
+  --ls-normal: 0.04em;
+  --ls-wide: 0.08em;
+  --ls-deco: 0.5em;
+
+  /* Unified star color */
+  --amber-star: var(--amber);
+
+  /* Transitions */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-html { background: var(--ink-deep); }
+html { background: var(--bg-deep); }
 
 body {
-  font-family: var(--font-body);
-  background: var(--ink-deep);
+  font-family: var(--font-ui);
+  background: var(--bg-deep);
   color: var(--text);
   min-height: 100vh; min-height: 100dvh;
-  line-height: 1.75;
-  font-size: 16px;
+  line-height: 1.7;
+  font-size: var(--text-base);
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior-y: contain;
   -webkit-font-smoothing: antialiased;
-  font-weight: 400;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-weight: var(--weight-light);
   overflow-x: hidden;
 }
 
-/* ---- 水墨背景氛围 ---- */
+/* ---- Nocturne atmosphere ---- */
 body::before {
   content: '';
   position: fixed; inset: 0;
   background:
-    /* 中心的微光 — 仿佛庙堂深处一盏油灯 */
-    radial-gradient(ellipse 50% 50% at 50% 35%, rgba(196, 163, 90, 0.06) 0%, transparent 70%),
-    /* 下方暖色 — 香炉余烬 */
-    radial-gradient(ellipse 70% 30% at 50% 85%, rgba(184, 58, 42, 0.04) 0%, transparent 60%),
-    /* 左上方冷光 — 天窗 */
-    radial-gradient(ellipse 30% 40% at 15% 20%, rgba(180, 160, 130, 0.03) 0%, transparent 50%);
+    radial-gradient(ellipse 55% 55% at 50% 30%, rgba(77,184,141,0.04) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 25% at 50% 90%, rgba(77,184,141,0.03) 0%, transparent 60%),
+    radial-gradient(ellipse 25% 35% at 20% 25%, rgba(212,149,58,0.02) 0%, transparent 50%);
   pointer-events: none; z-index: 0;
 }
 
-/* 水墨烟云 — 缓慢飘动 */
+/* Subtle grain texture */
 body::after {
   content: '';
-  position: fixed; inset: -10%;
-  background:
-    radial-gradient(ellipse 18% 35% at 25% 40%, rgba(196, 163, 90, 0.04) 0%, transparent 70%),
-    radial-gradient(ellipse 15% 28% at 72% 55%, rgba(180, 150, 120, 0.03) 0%, transparent 65%),
-    radial-gradient(ellipse 22% 20% at 50% 70%, rgba(184, 58, 42, 0.02) 0%, transparent 60%);
-  animation: inkSmoke 20s ease-in-out infinite;
-  pointer-events: none; z-index: 0;
-}
-@keyframes inkSmoke {
-  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.7; }
-  25% { transform: translate(1%, -0.5%) scale(1.03); opacity: 1; }
-  50% { transform: translate(-0.5%, 1%) scale(0.98); opacity: 0.5; }
-  75% { transform: translate(0.5%, -0.3%) scale(1.02); opacity: 0.8; }
-}
-
-/* 宣纸纤维纹理层 */
-.texture-layer {
   position: fixed; inset: 0;
-  opacity: 0.025;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-repeat: repeat; background-size: 256px 256px;
+  opacity: 0.018;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat; background-size: 200px 200px;
   pointer-events: none; z-index: 0;
 }
 
-/* 焦点环 */
+/* Focus ring */
 :focus-visible {
-  outline: 2px solid var(--gold);
+  outline: 2px solid var(--jade);
   outline-offset: 2px;
   border-radius: 2px;
 }
 
-/* 减弱动画偏好 */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -142,494 +187,522 @@ body::after {
   }
 }
 
-/* ---- 容器 ---- */
+/* ---- Container ---- */
 .container {
-  max-width: 460px;
+  max-width: 480px;
   margin: 0 auto;
-  padding: 20px 18px 40px;
+  padding: 24px 18px 48px;
   min-height: 100vh;
   position: relative;
   z-index: 1;
 }
 @media (min-width: 640px) {
-  .container { max-width: 620px; padding: 28px 24px 48px; }
+  .container { max-width: 640px; padding: 32px 28px 56px; }
 }
 @media (min-width: 960px) {
-  .container { max-width: 960px; padding: 40px 36px 64px; }
+  .container { max-width: 960px; padding: 48px 40px 72px; }
 }
 
 /* ============================================
-   头部 — 庙堂匾额风
+   Header
    ============================================ */
 .header {
-  text-align: center;
-  padding: 36px 0 0;
+  text-align: left;
+  padding: 56px 0 0;
   position: relative;
 }
 .header-inner {
-  display: inline-block;
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 8px;
   position: relative;
 }
 
-/* 主标题 — 如匾额大字 */
 .header h1 {
   font-family: var(--font-oracle);
-  font-size: 52px;
+  font-size: 48px;
   font-weight: 400;
-  color: var(--gold-bright);
-  letter-spacing: 0.14em;
-  text-shadow:
-    0 0 100px var(--gold-glow),
-    0 2px 8px rgba(0,0,0,0.7);
-  line-height: 1.2;
-  position: relative;
+  color: var(--jade-bright);
+  letter-spacing: 0.10em;
+  text-shadow: 0 0 80px var(--jade-glow), 0 2px 8px rgba(0,0,0,0.8);
+  line-height: 1.15;
+  -webkit-text-stroke: 0.5px rgba(77,184,141,0.12);
 }
 
-/* 朱砂印章 — 标题旁 */
+/* Jade seal stamp */
 .header-seal {
-  display: inline-block;
-  width: 40px; height: 40px;
-  border: 2px solid var(--vermillion);
-  color: var(--vermillion);
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  width: 38px; height: 38px;
+  border: 2px solid var(--jade);
+  color: var(--jade);
   font-family: var(--font-oracle);
-  font-size: 16px;
-  line-height: 36px;
-  text-align: center;
-  transform: rotate(8deg);
+  font-size: 15px;
+  transform: rotate(6deg);
   position: relative;
-  top: -20px;
-  margin-left: 6px;
-  opacity: 0.8;
-  text-shadow: none;
-  box-shadow: 0 0 12px var(--vermillion-glow), inset 0 0 8px rgba(184,58,42,0.1);
-  animation: sealPress 0.6s cubic-bezier(0.36, 0, 0.66, -0.56) 1s both;
+  top: -18px;
+  opacity: 0.85;
+  box-shadow: 0 0 16px var(--jade-glow);
+  animation: sealPress 0.6s cubic-bezier(0.36, 0, 0.66, -0.56) 0.8s both;
+  flex-shrink: 0;
 }
 @keyframes sealPress {
-  0% { transform: rotate(8deg) scale(2.5); opacity: 0; }
-  70% { transform: rotate(8deg) scale(0.9); opacity: 1; }
-  100% { transform: rotate(8deg) scale(1); opacity: 0.8; }
+  0% { transform: rotate(6deg) scale(2.5); opacity: 0; }
+  70% { transform: rotate(6deg) scale(0.9); opacity: 1; }
+  100% { transform: rotate(6deg) scale(1); opacity: 0.85; }
 }
 
 .header .subtitle {
   color: var(--text-dim);
-  font-size: 16px;
-  margin-top: 6px;
-  letter-spacing: 0.22em;
-  font-weight: 400;
+  font-size: var(--text-sm);
+  margin-top: 4px;
+  letter-spacing: 0.20em;
+  font-weight: var(--weight-light);
 }
 
-/* 匾额下的装饰横线 — 手绘感 */
 .header-rule {
   display: block;
-  margin: 16px auto 0;
-  width: 120px; height: 2px;
+  margin: 14px 0 0;
+  width: 140px; height: 1.5px;
   position: relative;
 }
 .header-rule::before {
   content: '';
   position: absolute; inset: 0;
   background: linear-gradient(90deg,
-    transparent 0%,
-    rgba(196, 163, 90, 0.1) 10%,
-    rgba(196, 163, 90, 0.5) 30%,
-    var(--gold) 50%,
-    rgba(196, 163, 90, 0.5) 70%,
-    rgba(196, 163, 90, 0.1) 90%,
+    rgba(77,184,141,0.55) 0%,
+    rgba(77,184,141,0.25) 50%,
     transparent 100%);
 }
-.header-rule::after {
-  content: '◆';
-  position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 5px;
-  color: var(--gold);
-  text-shadow: 0 0 6px var(--gold-glow);
-}
 
-/* ---- 位置状态 ---- */
+/* ---- Location ---- */
 .location-row {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 10px;
   flex-wrap: wrap;
-  margin: 18px 0 8px;
+  margin: 20px 0 10px;
 }
 .location-status {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 14px;
+  font-size: 13px;
   color: var(--text-dim);
-  padding: 7px 18px;
-  background: var(--ink);
-  border: 1px solid var(--border-ink);
-  border-radius: 2px;
-  letter-spacing: 0.04em;
+  padding: 7px 16px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  letter-spacing: 0.03em;
 }
 .location-status .dot {
   width: 6px; height: 6px;
   border-radius: 50%;
-  background: #4a4030;
-  transition: all 0.4s;
+  background: #3a3e46;
+  transition: all 0.4s var(--ease-out);
 }
 .location-status .dot.active {
   background: var(--success);
-  box-shadow: 0 0 8px rgba(107, 144, 128, 0.5);
+  box-shadow: 0 0 8px rgba(77,184,141,0.5);
   animation: dotPulse 3s infinite;
 }
 @keyframes dotPulse {
-  0%, 100% { opacity: 1; box-shadow: 0 0 6px rgba(107, 144, 128, 0.3); }
-  50% { opacity: 0.4; box-shadow: 0 0 14px rgba(107, 144, 128, 0.7); }
+  0%, 100% { opacity: 1; box-shadow: 0 0 6px rgba(77,184,141,0.3); }
+  50% { opacity: 0.4; box-shadow: 0 0 14px rgba(77,184,141,0.7); }
 }
 
 .api-config-toggle {
   background: none;
-  border: 1px solid var(--border-ink);
+  border: 1px solid var(--border-subtle);
   color: var(--text-muted);
-  padding: 6px 16px;
-  border-radius: 2px;
-  font-size: 14px;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-size: 13px;
   cursor: pointer;
-  transition: all 0.3s;
-  font-family: var(--font-body);
-  font-weight: 400;
-  letter-spacing: 0.04em;
+  transition: all 0.3s var(--ease-out);
+  font-family: var(--font-ui);
+  letter-spacing: 0.03em;
 }
 .api-config-toggle:hover {
-  border-color: var(--gold);
-  color: var(--gold-bright);
+  border-color: var(--jade);
+  color: var(--jade-bright);
 }
 
-/* ---- API Key 区块 ---- */
+/* ---- API Key section ---- */
 .api-key-section {
-  background: var(--ink);
-  border: 1px solid rgba(196, 163, 90, 0.25);
-  border-radius: 4px;
-  padding: 20px;
-  margin-bottom: 20px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 22px;
+  margin-bottom: 22px;
   text-align: center;
 }
 .api-key-section label {
   display: block;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   margin-bottom: 8px;
-  color: var(--gold-bright);
-  letter-spacing: 0.06em;
+  color: var(--jade-bright);
+  letter-spacing: 0.04em;
 }
 .api-key-section .help-text {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--text-dim);
   margin-bottom: 16px;
   line-height: 1.8;
 }
-.api-key-section a { color: var(--vermillion-bright); font-weight: 700; }
+.api-key-section a { color: var(--jade-bright); font-weight: 600; }
 .api-key-section input[type="text"] {
   width: 100%;
-  padding: 12px 14px;
-  border: 1px solid var(--border-ink);
-  border-radius: 2px;
-  font-size: 16px;
-  background: var(--ink-deep);
+  padding: 11px 14px;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+  background: var(--bg-base);
   color: var(--text);
   outline: none;
   transition: border-color 0.3s, box-shadow 0.3s;
-  font-family: var(--font-body);
+  font-family: var(--font-ui);
 }
 .api-key-section input[type="text"]:focus {
-  border-color: var(--gold);
-  box-shadow: 0 0 0 3px var(--gold-glow);
+  border-color: var(--jade);
+  box-shadow: 0 0 0 3px var(--jade-glow);
+}
+.api-sub-label {
+  display: block;
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+  text-align: left;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+}
+.api-sub-label--gap { margin-top: 10px; }
+.api-save-btn {
+  width: 100%;
+  margin-top: 14px;
+  padding: 12px;
+  font-size: 16px;
+}
+.api-status-text {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-top: 10px;
+  text-align: center;
+}
+.filter-hint {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 400;
 }
 
-/* ---- 抽签数选择 ---- */
+/* ---- Pick count ---- */
 .pick-count-row {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
-  gap: 2px;
-  margin-bottom: 16px;
+  gap: 4px;
+  margin-bottom: 18px;
 }
 .pick-count-row .label {
-  font-size: 15px;
+  font-size: 14px;
   color: var(--text-dim);
   margin-right: 8px;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
 }
 .pick-count-btn {
-  width: 38px; height: 38px;
-  border-radius: 2px;
-  border: 1.5px solid var(--border-ink);
-  background: var(--ink);
+  width: 36px; height: 36px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border-subtle);
+  background: var(--bg-surface);
   color: var(--text-dim);
   font-weight: 600;
-  font-size: 16px;
+  font-size: 15px;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.3s var(--ease-out);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--font-body);
+  font-family: var(--font-ui);
   margin: 0 3px;
 }
 .pick-count-btn.active {
-  background: var(--gold);
-  color: var(--ink-deep);
-  border-color: var(--gold);
-  box-shadow: 0 0 20px var(--gold-glow);
+  background: var(--jade);
+  color: #060708;
+  border-color: var(--jade);
+  box-shadow: 0 0 20px var(--jade-glow);
   font-weight: 700;
 }
 .pick-count-btn:hover:not(.active) {
-  border-color: var(--gold-pale);
-  color: var(--gold);
+  border-color: var(--jade-deep);
+  color: var(--jade-bright);
 }
 
 /* ============================================
-   掷筊按钮 — 庙堂法器
+   Main CTA Button
    ============================================ */
 .btn-row {
   display: flex;
   gap: 10px;
-  margin: 6px 0 24px;
+  margin: 6px auto 28px;
+  max-width: 360px;
 }
 .btn {
   flex: 1;
-  padding: 22px 28px;
+  padding: 20px 28px;
   border: none;
-  border-radius: 3px;
-  font-size: 26px;
+  border-radius: var(--radius-md);
+  font-size: 24px;
   font-weight: 400;
   cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.4s var(--ease-in-out);
   text-align: center;
   font-family: var(--font-oracle);
-  letter-spacing: 0.12em;
+  letter-spacing: 0.10em;
   position: relative;
   overflow: hidden;
 }
-.btn:active { transform: scale(0.96); }
+.btn:active { transform: scale(0.96); transition: transform 0.15s var(--ease-out); }
 
-/* 主按钮 — 仿佛青铜法器 */
 .btn-primary {
-  background:
-    linear-gradient(180deg, rgba(196, 163, 90, 0.3) 0%, rgba(160, 120, 50, 0.15) 50%, rgba(120, 80, 30, 0.25) 100%),
-    var(--ink-light);
-  color: var(--gold-bright);
-  border: 1.5px solid rgba(196, 163, 90, 0.5);
+  background: linear-gradient(135deg, rgba(77,184,141,0.25) 0%, rgba(58,158,114,0.12) 50%, rgba(45,122,88,0.2) 100%);
+  color: var(--jade-bright);
+  border: 1.5px solid rgba(77,184,141,0.45);
   box-shadow:
-    0 0 50px rgba(196, 163, 90, 0.15),
-    0 0 100px rgba(196, 163, 90, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.03);
-  text-shadow: 0 0 30px var(--gold-glow);
+    0 0 60px rgba(77,184,141,0.12),
+    0 0 120px rgba(77,184,141,0.04),
+    inset 0 1px 0 rgba(255,255,255,0.02);
+  text-shadow: 0 0 30px var(--jade-glow);
   animation: vesselGlow 4s ease-in-out infinite;
 }
 .btn-primary::before {
   content: '';
   position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, transparent 40%);
+  background: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, transparent 40%);
   pointer-events: none;
 }
 .btn-primary::after {
   content: '';
   position: absolute;
-  top: -1px; left: 20%; right: 20%; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(212, 185, 106, 0.5), transparent);
+  top: -1px; left: 25%; right: 25%; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(77,184,141,0.5), transparent);
   transition: all 0.4s;
 }
 .btn-primary:hover {
   box-shadow:
-    0 0 70px rgba(196, 163, 90, 0.25),
-    0 0 140px rgba(196, 163, 90, 0.08),
-    inset 0 2px 0 rgba(255, 255, 255, 0.04);
-  border-color: rgba(212, 185, 106, 0.7);
-  color: var(--gold-bright);
+    0 0 80px rgba(77,184,141,0.22),
+    0 0 150px rgba(77,184,141,0.06),
+    inset 0 2px 0 rgba(255,255,255,0.03);
+  border-color: rgba(77,184,141,0.65);
+  color: #68dba8;
   transform: translateY(-1px);
 }
 .btn-primary:hover::after {
-  left: 10%; right: 10%;
-  background: linear-gradient(90deg, transparent, rgba(212, 185, 106, 0.7), transparent);
+  left: 15%; right: 15%;
 }
 @keyframes vesselGlow {
-  0%, 100% { box-shadow: 0 0 50px rgba(196, 163, 90, 0.15), 0 0 100px rgba(196, 163, 90, 0.05), inset 0 1px 0 rgba(255,255,255,0.03); }
-  50% { box-shadow: 0 0 70px rgba(196, 163, 90, 0.22), 0 0 120px rgba(196, 163, 90, 0.08), inset 0 2px 0 rgba(255,255,255,0.05); }
+  0%, 100% { box-shadow: 0 0 60px rgba(77,184,141,0.12), 0 0 120px rgba(77,184,141,0.04), inset 0 1px 0 rgba(255,255,255,0.02); }
+  50% { box-shadow: 0 0 80px rgba(77,184,141,0.20), 0 0 150px rgba(77,184,141,0.07), inset 0 2px 0 rgba(255,255,255,0.04); }
 }
 .btn-primary:disabled {
-  background: linear-gradient(180deg, rgba(60,50,40,0.3), rgba(40,35,28,0.3));
+  background: rgba(30,33,40,0.5);
   color: var(--text-muted);
-  border-color: var(--border-ink);
+  border-color: var(--border-subtle);
   box-shadow: none;
   text-shadow: none;
   animation: none;
   cursor: not-allowed;
-  opacity: 0.5;
+  opacity: 0.45;
 }
 .btn-primary:disabled:hover { transform: none; }
 .btn-primary:disabled::after { display: none; }
 
 .btn-secondary {
-  background: var(--ink);
+  background: var(--bg-surface);
   color: var(--text-dim);
-  border: 1px solid var(--border-ink);
-  font-family: var(--font-body);
-  font-weight: 400;
-  font-size: 15px;
-  letter-spacing: 0.04em;
-  border-radius: 2px;
+  border: 1px solid var(--border-subtle);
+  font-family: var(--font-ui);
+  font-weight: 500;
+  font-size: 14px;
+  letter-spacing: 0.03em;
+  border-radius: var(--radius-sm);
 }
 .btn-secondary:hover {
-  border-color: var(--gold);
-  color: var(--gold-bright);
-  background: var(--ink-wash);
+  border-color: var(--jade-deep);
+  color: var(--jade-bright);
+  background: var(--bg-elevated);
+}
+.btn-secondary.faved {
+  color: var(--jade-bright) !important;
 }
 .btn-sm {
-  padding: 10px 18px;
-  font-size: 14px;
+  padding: 9px 16px;
+  font-size: 13px;
 }
 
 /* ============================================
-   结果卡片 — 宣纸卷轴
+   Result Card - Bone White on Nocturne
    ============================================ */
 .result-card {
-  background: var(--paper);
-  border-radius: 2px;
-  padding: 28px 22px;
-  margin: 10px 0 14px;
-  text-align: center;
-  border: 1px solid var(--border-paper);
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  padding: 36px 32px;
+  margin: 10px 0 16px;
+  text-align: left;
+  border: 1px solid var(--card-border);
   position: relative;
   overflow: hidden;
-  color: var(--ink-text);
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  color: var(--card-text);
+  transition: all 0.5s var(--ease-in-out);
   box-shadow:
-    0 2px 20px rgba(0,0,0,0.3),
-    0 1px 3px rgba(0,0,0,0.2);
+    0 8px 48px rgba(0,0,0,0.45),
+    0 2px 8px rgba(77,184,141,0.05),
+    0 0 1px rgba(77,184,141,0.08);
 }
-/* 宣纸纤维纹理 */
 .result-card::before {
   content: '';
   position: absolute; inset: 0;
-  opacity: 0.04;
+  opacity: 0.025;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-repeat: repeat; background-size: 200px 200px;
+  background-repeat: repeat; background-size: 180px 180px;
   pointer-events: none; z-index: 0;
 }
-/* 卷轴顶部木轴 */
+.result-card.has-result {
+  animation: scrollUnfurl 0.7s var(--ease-in-out);
+}
 .result-card.has-result::after {
   content: '';
-  position: absolute; top: 0; left: -4px; right: -4px; height: 6px;
-  background: linear-gradient(180deg,
-    rgba(139, 100, 60, 0.6) 0%,
-    rgba(180, 140, 90, 0.35) 30%,
-    rgba(139, 100, 60, 0.5) 60%,
-    rgba(100, 70, 40, 0.4) 100%);
-  border-radius: 2px;
+  position: absolute; top: 0; left: -4px; right: -4px; height: 2px;
+  background: linear-gradient(90deg,
+    rgba(77,184,141,0.6) 0%,
+    rgba(77,184,141,0.3) 50%,
+    rgba(212,149,58,0.15) 100%);
+  border-radius: 2px 2px 0 0;
   z-index: 2;
 }
-.result-card.has-result {
-  animation: scrollUnfurl 0.7s cubic-bezier(0.22, 0.61, 0.36, 1);
-}
 @keyframes scrollUnfurl {
-  0% { opacity: 0; transform: scaleY(0.3); transform-origin: top; filter: brightness(2); }
+  0% { opacity: 0; transform: scaleY(0.3); transform-origin: top; filter: brightness(1.8); }
   60% { transform: scaleY(1.02); filter: brightness(1); }
   100% { opacity: 1; transform: scaleY(1); }
 }
 
+/* Staggered child reveals inside result card */
+.result-card.has-result .result-photo { animation: fadeSlideIn 0.5s var(--ease-out) 0.1s both; }
+.result-card.has-result .result-name { animation: fadeSlideIn 0.5s var(--ease-out) 0.2s both; }
+.result-card.has-result .result-stars { animation: fadeSlideIn 0.5s var(--ease-out) 0.3s both; }
+.result-card.has-result .result-meta { animation: fadeSlideIn 0.5s var(--ease-out) 0.35s both; }
+.result-card.has-result .result-address { animation: fadeSlideIn 0.5s var(--ease-out) 0.4s both; }
+.result-card.has-result .result-type { animation: fadeSlideIn 0.5s var(--ease-out) 0.45s both; }
+.result-card.has-result .oracle-verdict { animation: fadeSlideIn 0.5s var(--ease-out) 0.55s both; }
+.result-card.has-result .result-map { animation: fadeSlideIn 0.5s var(--ease-out) 0.6s both; }
+.result-card.has-result .result-nav-row { animation: fadeSlideIn 0.5s var(--ease-out) 0.65s both; }
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .result-empty {
-  padding: 36px 20px;
-  color: var(--ink-text-dim);
+  padding: 56px 20px;
+  color: var(--card-text-dim);
   position: relative; z-index: 1;
-  font-size: 16px;
+  font-size: 15px;
 }
 .result-empty .empty-symbol {
   font-family: var(--font-oracle);
-  font-size: 60px;
-  color: var(--ink-text-muted);
-  margin-bottom: 12px;
-  opacity: 0.4;
+  font-size: 72px;
+  color: var(--card-text-muted);
+  margin-bottom: 16px;
+  opacity: 0.15;
+}
+.result-hint {
+  font-size: 13px;
+  margin-top: 6px;
 }
 
-/* 餐厅名 */
 .result-name {
   font-family: var(--font-oracle);
-  font-size: 42px;
+  font-size: 40px;
   font-weight: 400;
-  color: var(--ink-text);
-  margin-bottom: 12px;
-  letter-spacing: 0.06em;
+  color: var(--card-text);
+  margin-bottom: 14px;
+  letter-spacing: 0.05em;
   line-height: 1.3;
   position: relative; z-index: 1;
 }
 
-/* 评分星星 */
 .result-stars {
   display: inline-flex;
   gap: 3px;
-  margin-bottom: 12px;
-  font-size: 18px;
-  color: var(--gold-pale);
+  margin-bottom: 14px;
+  font-size: 17px;
+  color: var(--amber);
   align-items: center;
   position: relative; z-index: 1;
 }
 .result-stars .score {
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 700;
-  color: var(--ink-text);
+  color: var(--card-text);
   margin-left: 8px;
-  font-family: var(--font-body);
+  font-family: var(--font-ui);
+}
+.star-badge {
+  color: var(--amber-star);
+  font-weight: var(--weight-semibold);
 }
 
-/* 元数据 */
 .result-meta {
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 24px;
-  font-size: 15px;
-  color: var(--ink-text-dim);
+  font-size: 14px;
+  color: var(--card-text-dim);
   margin-bottom: 10px;
   flex-wrap: wrap;
   position: relative; z-index: 1;
 }
 .result-meta span { white-space: nowrap; }
 .result-address {
-  font-size: 14px;
-  color: var(--ink-text-dim);
+  font-size: 13px;
+  color: var(--card-text-dim);
   margin-bottom: 8px;
   position: relative; z-index: 1;
 }
 .result-type {
   display: inline-block;
   padding: 4px 14px;
-  background: rgba(212, 185, 106, 0.18);
-  color: #8b6d2e;
-  border: 1px solid rgba(212, 185, 106, 0.35);
-  border-radius: 2px;
+  background: rgba(77,184,141,0.12);
+  color: var(--jade-muted);
+  border: 1px solid rgba(77,184,141,0.25);
+  border-radius: var(--radius-full);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 600;
   margin-top: 10px;
   position: relative; z-index: 1;
 }
 
-/* ============================================
-   食神判词
-   ============================================ */
+/* ---- Oracle Verdict ---- */
 .oracle-verdict {
-  margin: 24px 0 10px;
-  padding: 20px 12px;
+  margin: 28px -32px 12px;
+  padding: 22px 32px;
   position: relative; z-index: 1;
   text-align: center;
-  background: rgba(212, 64, 48, 0.05);
-  border-top: 2px solid rgba(212, 64, 48, 0.25);
-  border-bottom: 2px solid rgba(212, 64, 48, 0.25);
+  background: rgba(196,74,63,0.04);
+  border-top: 2px solid rgba(196,74,63,0.2);
+  border-bottom: 2px solid rgba(196,74,63,0.2);
 }
 .oracle-verdict .verdict-text {
   font-family: var(--font-verdict);
-  font-size: 30px;
-  color: var(--vermillion);
-  letter-spacing: 0.1em;
+  font-size: 28px;
+  color: var(--cinnabar);
+  letter-spacing: 0.08em;
   line-height: 1.6;
   font-weight: 400;
-  text-shadow: 0 2px 4px rgba(184, 40, 20, 0.15);
+  text-shadow: 0 1px 3px rgba(150,40,30,0.1);
   animation: verdictInk 0.8s ease-out 0.3s both;
 }
 @keyframes verdictInk {
@@ -637,48 +710,46 @@ body::after {
   100% { opacity: 1; filter: blur(0); transform: translateY(0); }
 }
 
-/* 判词两侧的装饰 — 小朱砂点 */
 .oracle-verdict::before,
 .oracle-verdict::after {
   content: '';
   position: absolute;
   width: 4px; height: 4px;
-  background: var(--vermillion);
+  background: var(--cinnabar);
   border-radius: 50%;
   top: 50%;
-  opacity: 0.4;
+  opacity: 0.3;
 }
 .oracle-verdict::before { left: 0; }
 .oracle-verdict::after { right: 0; }
 
-/* 判词顶部装饰线 */
 .oracle-verdict-deco {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 14px;
   margin-bottom: 14px;
-  color: var(--vermillion);
-  font-size: 14px;
-  letter-spacing: 8px;
+  color: var(--cinnabar);
+  font-size: 13px;
+  letter-spacing: var(--ls-deco);
   font-weight: 700;
-  opacity: 0.7;
+  opacity: 0.6;
 }
 .oracle-verdict-deco::before,
 .oracle-verdict-deco::after {
   content: '';
   display: block;
-  width: 30px; height: 2px;
-  background: var(--vermillion);
-  opacity: 0.5;
+  width: 28px; height: 1.5px;
+  background: var(--cinnabar);
+  opacity: 0.4;
 }
 
-/* 操作按钮区 */
+/* Result actions */
 .result-actions {
   display: flex;
   gap: 8px;
-  margin-top: 18px;
-  justify-content: center;
+  margin-top: 20px;
+  justify-content: flex-start;
   flex-wrap: wrap;
   position: relative; z-index: 1;
 }
@@ -688,242 +759,281 @@ body::after {
   width: 100%;
   height: 200px;
   object-fit: cover;
-  border-radius: 2px;
-  margin-bottom: 16px;
-  background: var(--paper-dark);
-  border: 1px solid var(--border-paper);
+  border-radius: var(--radius-sm);
+  margin-bottom: 18px;
+  background: var(--card-bg-dim);
+  border: 1px solid var(--card-border);
   position: relative; z-index: 1;
 }
 .result-map {
   width: 100%; height: 180px;
-  border-radius: 2px;
-  margin-top: 14px;
+  border-radius: var(--radius-sm);
+  margin-top: 16px;
   overflow: hidden;
-  border: 1px solid var(--border-paper);
+  border: 1px solid var(--card-border);
   position: relative; z-index: 1;
 }
 .result-nav-row {
   display: flex; gap: 8px;
-  margin-top: 14px;
-  justify-content: center; flex-wrap: wrap;
+  margin-top: 16px;
+  justify-content: flex-start; flex-wrap: wrap;
   position: relative; z-index: 1;
 }
 .result-nav-btn {
   display: inline-flex; align-items: center; gap: 6px;
-  padding: 12px 26px;
-  background: var(--ink-text);
-  color: var(--paper);
-  border: none; border-radius: 2px;
-  font-size: 16px; font-weight: 700;
+  padding: 11px 24px;
+  background: var(--card-text);
+  color: var(--card-bg);
+  border: none; border-radius: var(--radius-sm);
+  font-size: 15px; font-weight: 600;
   cursor: pointer; text-decoration: none;
-  transition: all 0.3s;
-  font-family: var(--font-body);
-  letter-spacing: 0.06em;
+  transition: all 0.3s var(--ease-out);
+  font-family: var(--font-ui);
+  letter-spacing: 0.04em;
 }
 .result-nav-btn:hover {
-  background: #1a1a1a;
+  background: #2a2824;
   box-shadow: 0 4px 16px rgba(0,0,0,0.3);
   transform: translateY(-1px);
 }
 
-/* 多结果条目 */
+/* Multi-result items */
 .multi-result-item {
-  padding: 16px 0;
-  border-bottom: 1px solid var(--border-paper);
+  padding: 20px 0;
+  border-bottom: 1px solid var(--card-border);
   text-align: left;
   position: relative; z-index: 1;
 }
+.multi-result-item::before {
+  content: '';
+  position: absolute;
+  left: -8px; top: 0; bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, var(--jade) 0%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.multi-result-item:hover::before { opacity: 0.3; }
 .multi-result-item:last-child { border-bottom: none; }
 .multi-result-item .mr-header {
   display: flex; justify-content: space-between;
   align-items: flex-start; gap: 10px;
 }
 .multi-result-item .mr-name {
-  font-size: 17px; font-weight: 700; flex: 1;
-  font-family: var(--font-body);
+  font-size: 16px; font-weight: 700; flex: 1;
+  font-family: var(--font-ui);
 }
 .multi-result-item .mr-stars {
-  font-size: 15px; color: var(--gold-pale); white-space: nowrap;
+  font-size: 14px; color: var(--amber); white-space: nowrap;
 }
 .multi-result-item .mr-meta {
-  font-size: 14px; color: var(--ink-text-dim);
+  font-size: 13px; color: var(--card-text-dim);
   margin-top: 6px; display: flex; gap: 16px; flex-wrap: wrap;
 }
 .multi-result-item .mr-address {
-  font-size: 13px; color: var(--ink-text-dim); margin-top: 4px;
+  font-size: 12px; color: var(--card-text-dim); margin-top: 4px;
 }
 .multi-result-item .mr-actions {
   margin-top: 10px; display: flex; gap: 10px;
 }
 .multi-result-item .mr-nav {
-  font-size: 14px; color: var(--gold-pale); text-decoration: none; font-weight: 700;
+  font-size: 13px; color: var(--jade-muted); text-decoration: none; font-weight: 700;
 }
 .multi-result-item .mr-blacklist {
-  font-size: 14px; color: var(--vermillion);
+  font-size: 13px; color: var(--cinnabar);
   background: none; border: none; cursor: pointer; font-weight: 700;
-  font-family: var(--font-body);
+  font-family: var(--font-ui);
+}
+.mr-count-header {
+  text-align: center;
+  font-weight: 700;
+  margin-bottom: 14px;
+  font-size: 17px;
+  color: var(--card-text);
+}
+.mr-type-label {
+  color: var(--jade-muted);
+}
+.chip-type-label {
+  color: var(--jade-muted);
 }
 
 /* ============================================
-   区块卡片 — 折叠的笺纸
+   Sections
    ============================================ */
 .section {
-  background: var(--ink);
-  border: 1px solid var(--border-ink);
-  border-radius: 2px;
-  padding: 16px 18px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
   margin-bottom: 10px;
-  transition: border-color 0.3s;
+  transition: border-color 0.3s, box-shadow 0.3s, background 0.3s;
 }
-.section:hover { border-color: rgba(196, 163, 90, 0.2); }
+.section:hover {
+  border-color: rgba(77,184,141,0.2);
+  box-shadow: 0 4px 20px rgba(77,184,141,0.04);
+  background: rgba(20,23,28,0.8);
+}
 
 .bottom-sections-grid {
   display: grid; gap: 10px;
 }
+.bottom-sections-grid .section:nth-child(2) { margin-top: 8px; }
+.bottom-sections-grid .section:nth-child(3) { margin-top: 20px; }
 @media (min-width: 768px) {
   .bottom-sections-grid {
     grid-template-columns: repeat(3, 1fr);
   }
   .bottom-sections-grid .section { margin-bottom: 0; }
+  .bottom-sections-grid .section:nth-child(2),
+  .bottom-sections-grid .section:nth-child(3) { margin-top: 0; }
 }
 
 .section-header {
   display: flex; justify-content: space-between;
   align-items: center; cursor: pointer; user-select: none;
+  transition: color 0.2s, transform 0.2s;
 }
+.section-header:hover { color: var(--jade-bright); }
+.section-header:active { transform: scale(0.98); }
 .section-header h2 {
-  font-size: 16px; font-weight: 600;
+  font-size: 15px; font-weight: var(--weight-bold);
   color: var(--text-dim);
-  font-family: var(--font-body);
-  letter-spacing: 0.06em;
+  font-family: var(--font-ui);
+  letter-spacing: 0.04em;
 }
 .section-header .arrow {
-  transition: transform 0.3s;
-  font-size: 12px; color: var(--text-muted);
+  transition: transform 0.3s var(--ease-out);
+  font-size: 11px; color: var(--text-muted);
 }
 .section-header .arrow.open { transform: rotate(180deg); }
-.section-body { margin-top: 14px; display: none; }
+.section-body { margin-top: 16px; display: none; }
 .section-body.open { display: block; }
 
-/* 筛选器 */
-.filter-row { margin-bottom: 16px; }
+/* ---- Filters ---- */
+.filter-row { margin-bottom: 18px; }
 .filter-row:last-child { margin-bottom: 0; }
 .filter-label {
   display: flex; justify-content: space-between;
-  font-size: 15px; font-weight: 600;
+  font-size: 14px; font-weight: 600;
   margin-bottom: 8px; color: var(--text-dim);
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
 }
-.filter-label .value { color: var(--gold-bright); font-weight: 700; }
+.filter-label .value { color: var(--jade-bright); font-weight: 700; }
 
-/* 滑块 */
 .filter-row input[type="range"] {
   width: 100%; height: 4px;
   -webkit-appearance: none; appearance: none;
-  background: var(--border-ink); border-radius: 2px; outline: none;
+  background: var(--border-medium); border-radius: 2px; outline: none;
 }
 .filter-row input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none; appearance: none;
-  width: 18px; height: 18px; border-radius: 2px;
-  background: var(--gold);
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--jade);
   cursor: pointer;
-  box-shadow: 0 0 10px var(--gold-glow);
+  box-shadow: 0 0 10px var(--jade-glow);
   transition: box-shadow 0.3s;
 }
 .filter-row input[type="range"]::-webkit-slider-thumb:hover {
-  box-shadow: 0 0 18px var(--gold-glow);
+  box-shadow: 0 0 18px var(--jade-glow);
 }
 .filter-row input[type="range"]::-moz-range-thumb {
-  width: 18px; height: 18px; border-radius: 2px;
-  background: var(--gold); border: none; cursor: pointer;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--jade); border: none; cursor: pointer;
 }
 
-/* 标签 */
 .price-options, .cuisine-tags {
   display: flex; flex-wrap: wrap; gap: 7px;
 }
 .price-chip, .cuisine-tag {
-  padding: 6px 16px;
-  border: 1.5px solid var(--border-ink);
-  border-radius: 2px;
-  font-size: 14px; cursor: pointer;
-  transition: all 0.25s;
-  background: var(--ink-deep);
+  padding: 6px 14px;
+  border: 1.5px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  font-size: 13px; cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+  background: var(--bg-base);
   color: var(--text-dim);
   user-select: none;
-  font-family: var(--font-body);
-  letter-spacing: 0.03em;
+  font-family: var(--font-ui);
+  letter-spacing: 0.02em;
 }
+.price-chip:active, .cuisine-tag:active { transform: scale(0.94); }
 .price-chip.active, .cuisine-tag.active {
-  background: rgba(212, 185, 106, 0.15);
-  border-color: var(--gold);
-  color: var(--gold-bright);
-  font-weight: 700;
-  box-shadow: 0 0 10px rgba(212, 185, 106, 0.1);
+  background: rgba(77,184,141,0.12);
+  border-color: var(--jade);
+  color: var(--jade-bright);
+  font-weight: 600;
+  box-shadow: 0 0 8px rgba(77,184,141,0.08);
 }
 .price-chip:hover, .cuisine-tag:hover {
-  border-color: var(--gold);
+  border-color: var(--jade-deep);
   color: var(--text);
 }
 
-/* 列表项 */
+/* ---- List items ---- */
 .list-item {
   display: flex; justify-content: space-between;
-  align-items: center; padding: 12px 0;
-  border-bottom: 1px solid var(--border-ink);
-  cursor: pointer; transition: background 0.2s;
+  align-items: center; padding: 13px 8px;
+  margin: 0 -8px;
+  border-bottom: 1px solid var(--border-subtle);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
 }
 .list-item:last-child { border-bottom: none; }
-.list-item:hover { background: rgba(196, 163, 90, 0.02); }
+.list-item:hover {
+  background: rgba(77,184,141,0.03);
+  transform: translateX(4px);
+  box-shadow: -4px 0 0 rgba(77,184,141,0.1);
+}
 .list-item .info { flex: 1; min-width: 0; }
-.list-item .name { font-size: 15px; font-weight: 600; color: var(--text); }
+.list-item .name { font-size: 14px; font-weight: 600; color: var(--text); }
 .list-item .meta {
-  font-size: 13px; color: var(--text-dim);
+  font-size: 12px; color: var(--text-dim);
   margin-top: 3px; display: flex; gap: 10px; flex-wrap: wrap;
 }
-.list-item .date { font-size: 13px; color: var(--text-muted); }
+.list-item .date { font-size: 12px; color: var(--text-muted); }
 .list-item .item-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
 .list-item .fav-btn {
-  background: none; border: none; font-size: 18px; cursor: pointer;
-  padding: 4px 8px; border-radius: 2px; line-height: 1;
+  background: none; border: none; font-size: 17px; cursor: pointer;
+  padding: 4px 8px; border-radius: var(--radius-sm); line-height: 1;
   transition: transform 0.2s, color 0.2s; color: var(--text-muted);
 }
 .list-item .fav-btn:hover { transform: scale(1.2); }
-.list-item .fav-btn.faved { color: var(--gold-bright); }
+.list-item .fav-btn.faved { color: var(--amber); }
 .list-item .remove-btn {
-  background: none; border: none; color: var(--danger);
-  font-size: 20px; cursor: pointer; padding: 4px 8px;
-  border-radius: 2px; line-height: 1; transition: background 0.2s;
+  background: none; border: none; color: var(--cinnabar);
+  font-size: 18px; cursor: pointer; padding: 4px 8px;
+  border-radius: var(--radius-sm); line-height: 1; transition: background 0.2s;
 }
-.list-item .remove-btn:hover { background: rgba(212, 64, 48, 0.1); }
+.list-item .remove-btn:hover { background: rgba(196,74,63,0.08); }
 
 .list-empty {
-  text-align: center; padding: 26px;
-  color: var(--text-muted); font-size: 14px;
+  text-align: center; padding: 28px;
+  color: var(--text-muted); font-size: 13px;
 }
 .clear-btn {
-  background: none; border: 1px solid var(--border-ink);
+  background: none; border: 1px solid var(--border-subtle);
   color: var(--text-muted); padding: 8px 16px;
-  border-radius: 2px; font-size: 13px; cursor: pointer;
+  border-radius: var(--radius-sm); font-size: 13px; cursor: pointer;
   margin-top: 12px; transition: all 0.3s;
-  font-family: var(--font-body); letter-spacing: 0.04em;
+  font-family: var(--font-ui); letter-spacing: 0.03em;
 }
-.clear-btn:hover { border-color: var(--danger); color: var(--danger); }
+.clear-btn:hover { border-color: var(--cinnabar); color: var(--cinnabar); }
 
 /* ============================================
-   占卜动画层 — 核心仪式体验
+   Oracle Ritual Animation
    ============================================ */
 .oracle-ritual {
   position: fixed; inset: 0;
-  background: rgba(10, 8, 5, 0.92);
-  backdrop-filter: blur(8px);
+  background: rgba(4,5,7,0.94);
+  backdrop-filter: blur(12px);
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
   z-index: 100;
   cursor: default;
 }
 
-/* 焚香烟气粒子 */
 .ritual-smoke {
   position: absolute; inset: 0;
   pointer-events: none; overflow: hidden;
@@ -933,26 +1043,26 @@ body::after {
   bottom: 30%;
   left: 50%;
   width: 80px; height: 80px;
-  background: radial-gradient(circle, rgba(196, 163, 90, 0.1) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(77,184,141,0.1) 0%, transparent 70%);
   border-radius: 50%;
   animation: smokeRise 4s ease-out infinite;
 }
-.smoke-particle:nth-child(1) { animation-delay: 0s; left: 42%; }
+.smoke-particle:nth-child(1) { animation-delay: 0s; left: 44%; }
 .smoke-particle:nth-child(2) { animation-delay: 0.6s; left: 50%; width: 60px; height: 60px; }
-.smoke-particle:nth-child(3) { animation-delay: 1.2s; left: 55%; width: 70px; height: 70px; }
-.smoke-particle:nth-child(4) { animation-delay: 0.3s; left: 46%; width: 55px; height: 55px; }
-.smoke-particle:nth-child(5) { animation-delay: 0.9s; left: 52%; width: 65px; height: 65px; }
+.smoke-particle:nth-child(3) { animation-delay: 1.2s; left: 54%; width: 70px; height: 70px; }
+.smoke-particle:nth-child(4) { animation-delay: 0.3s; left: 47%; width: 55px; height: 55px; }
+.smoke-particle:nth-child(5) { animation-delay: 0.9s; left: 51%; width: 65px; height: 65px; }
 @keyframes smokeRise {
-  0% { transform: translateY(0) translateX(0) scale(0.8); opacity: 0.6; }
-  50% { opacity: 0.3; }
-  100% { transform: translateY(-200px) translateX(20px) scale(2.5); opacity: 0; }
+  0% { transform: translateY(0) translateX(0) scale(0.8); opacity: 0.5; }
+  50% { opacity: 0.25; }
+  100% { transform: translateY(-220px) translateX(20px) scale(2.8); opacity: 0; }
 }
 
-/* 签条容器 */
+/* Divination slip */
 .divination-slip {
   position: relative;
-  width: 180px;
-  height: 260px;
+  width: 170px;
+  height: 250px;
   perspective: 800px;
 }
 .slip-card {
@@ -974,78 +1084,79 @@ body::after {
   60% { transform: rotateX(0deg) translateY(0); }
 }
 
-/* 签条本体 — 竹木质感 */
+/* Slip face - dark jade-toned */
 .slip-face {
   position: absolute; inset: 0;
-  background: linear-gradient(180deg, #e8dcc0 0%, #dccca0 30%, #d4c090 60%, #c8b480 100%);
-  border: 2px solid #b89a60;
-  border-radius: 4px;
+  background: linear-gradient(180deg, #1a2a22 0%, #15261d 30%, #111f18 60%, #0d1a14 100%);
+  border: 2px solid rgba(77,184,141,0.5);
+  border-radius: var(--radius-sm);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 20px;
   box-shadow:
-    0 8px 32px rgba(0,0,0,0.5),
-    inset 0 1px 0 rgba(255,255,255,0.2);
-  /* 木纹 */
+    0 8px 40px rgba(0,0,0,0.6),
+    0 0 60px rgba(77,184,141,0.1),
+    inset 0 1px 0 rgba(255,255,255,0.03);
   background-image:
-    repeating-linear-gradient(90deg, transparent, transparent 8px, rgba(139,100,60,0.05) 8px, rgba(139,100,60,0.05) 9px);
+    repeating-linear-gradient(90deg, transparent, transparent 8px, rgba(77,184,141,0.03) 8px, rgba(77,184,141,0.03) 9px);
 }
 
-/* 签上的朱砂印记 */
+/* Jade seal */
 .slip-seal {
   position: absolute;
-  top: 16px; right: 20px;
+  top: 14px; right: 18px;
   width: 28px; height: 28px;
-  border: 1.5px solid var(--vermillion);
-  color: var(--vermillion);
+  border: 1.5px solid var(--jade);
+  color: var(--jade-bright);
   font-family: var(--font-oracle);
   font-size: 13px;
   line-height: 25px;
   text-align: center;
-  transform: rotate(12deg);
+  transform: rotate(10deg);
   opacity: 0;
   animation: sealAppear 0.5s ease-out 1.2s forwards;
+  box-shadow: 0 0 12px var(--jade-glow);
 }
 @keyframes sealAppear {
-  0% { transform: rotate(12deg) scale(2); opacity: 0; }
-  100% { transform: rotate(12deg) scale(1); opacity: 0.8; }
+  0% { transform: rotate(10deg) scale(2); opacity: 0; }
+  100% { transform: rotate(10deg) scale(1); opacity: 0.85; }
 }
 
-/* 签上的符文 — 逐渐显现 */
 .slip-glyph {
   font-family: var(--font-oracle);
-  font-size: 40px;
-  color: var(--ink-text);
+  font-size: 42px;
+  color: var(--jade-bright);
   opacity: 0;
   animation: glyphAppear 2s ease-out 1s forwards;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
+  text-shadow: 0 0 20px var(--jade-glow);
 }
 @keyframes glyphAppear {
   0% { opacity: 0; filter: blur(6px); transform: scale(0.9); }
-  60% { opacity: 0.6; filter: blur(2px); }
+  60% { opacity: 0.5; filter: blur(2px); }
   100% { opacity: 1; filter: blur(0); transform: scale(1); }
 }
 
 .slip-text {
   margin-top: 10px;
-  font-family: var(--font-body);
-  font-size: 13px;
-  color: var(--ink-text-dim);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  color: rgba(77,184,141,0.6);
   text-align: center;
   opacity: 0;
   animation: textAppear 1.5s ease-out 1.6s forwards;
 }
 @keyframes textAppear {
   0% { opacity: 0; transform: translateY(4px); }
-  100% { opacity: 0.7; transform: translateY(0); }
+  100% { opacity: 0.6; transform: translateY(0); }
 }
 
-/* 金光爆发 */
+/* Jade flash */
 .ritual-flash {
   position: fixed; inset: 0;
-  background: radial-gradient(circle, rgba(212, 185, 106, 0.3) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(77,184,141,0.25) 0%, transparent 70%);
   pointer-events: none; z-index: 101;
   opacity: 0;
   animation: flashBurst 0.8s ease-out 2.8s forwards;
@@ -1057,71 +1168,74 @@ body::after {
 }
 
 .ritual-hint {
-  margin-top: 24px;
-  font-family: var(--font-body);
-  font-size: 18px;
+  margin-top: 28px;
+  font-family: var(--font-ui);
+  font-size: 16px;
   color: var(--text-dim);
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   animation: hintPulse 2s ease-in-out infinite;
 }
 @keyframes hintPulse {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 0.9; }
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.85; }
 }
 
-/* 摇一摇提示 */
+/* Shake hint */
 .shake-hint {
   display: none;
   text-align: center;
   margin-top: 8px;
-  font-size: 14px;
+  font-size: 13px;
   color: var(--text-muted);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   animation: hintPulse 2.5s ease-in-out infinite;
 }
 .shake-hint.visible { display: block; }
 
-/* 加载旋转器（保留用于SDK加载等非占卜场景） */
+/* Spinner */
 .spinner-overlay {
   position: fixed; inset: 0;
-  background: rgba(10, 8, 5, 0.88);
-  backdrop-filter: blur(4px);
+  background: rgba(4,5,7,0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  z-index: 100; gap: 18px;
+  z-index: 100; gap: 20px;
 }
 .spinner {
-  width: 40px; height: 40px;
-  border: 2px solid var(--border-ink);
-  border-top-color: var(--gold);
+  width: 36px; height: 36px;
+  border: 2px solid var(--border-medium);
+  border-top-color: var(--jade);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 .spinner-text {
-  font-size: 16px; font-weight: 400;
+  font-size: 15px; font-weight: 500;
   color: var(--text-dim);
-  font-family: var(--font-body);
-  letter-spacing: 0.08em;
+  font-family: var(--font-ui);
+  letter-spacing: 0.06em;
 }
 
 /* Toast */
 .toast {
   position: fixed; top: 32px; left: 50%;
   transform: translateX(-50%);
-  background: var(--ink-light);
+  background: rgba(28,31,39,0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   color: var(--text);
   padding: 12px 28px;
-  border-radius: 3px;
-  font-size: 15px; font-weight: 400;
+  border-radius: var(--radius-md);
+  font-size: 14px; font-weight: 500;
   z-index: 200;
-  border: 1px solid var(--border-ink);
-  box-shadow: 0 10px 36px rgba(0,0,0,0.7);
-  animation: toastIn 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+  border: 1px solid rgba(77,184,141,0.15);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(77,184,141,0.05);
+  animation: toastIn 0.35s var(--ease-in-out),
              toastOut 0.3s 2.4s ease-in forwards;
   white-space: nowrap;
-  font-family: var(--font-body);
-  letter-spacing: 0.04em;
+  font-family: var(--font-ui);
+  letter-spacing: 0.03em;
 }
 @keyframes toastIn {
   from { opacity: 0; transform: translateX(-50%) translateY(-12px); }
@@ -1133,85 +1247,81 @@ body::after {
 
 .hidden { display: none !important; }
 
-/* 页脚 */
 .footer {
-  text-align: center; padding: 24px;
-  color: var(--text-faint); font-size: 13px;
-  letter-spacing: 0.1em;
+  text-align: left; padding: 40px 8px 32px;
+  color: var(--text-faint); font-size: 12px;
+  letter-spacing: 0.08em;
 }
 
-/* 调试面板 */
+/* Debug */
 #debugPanel .section-header h2 { color: var(--text-muted); }
 #debugContent {
-  font-size: 9px; white-space: pre-wrap; word-break: break-all;
+  font-size: 10px; white-space: pre-wrap; word-break: break-all;
   max-height: 180px; overflow-y: auto;
-  background: var(--ink-deep); padding: 10px;
-  border-radius: 2px; color: var(--text-dim);
-  font-family: 'SF Mono', 'Fira Code', monospace;
+  background: var(--bg-base); padding: 10px;
+  border-radius: var(--radius-sm); color: var(--text-dim);
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
 }
 
-/* 滚动条 */
+/* Scrollbar */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border-ink); border-radius: 2px; }
+::-webkit-scrollbar-thumb { background: var(--border-medium); border-radius: 2px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
-/* ---- 响应式 ---- */
+/* ---- Responsive ---- */
 @media (max-width: 360px) {
-  .container { padding: 14px 12px 32px; }
+  .container { padding: 16px 10px 36px; }
   .header h1 { font-size: 36px; }
-  .header-seal { width: 36px; height: 36px; font-size: 15px; line-height: 30px; top: -16px; }
+  .header-seal { width: 32px; height: 32px; font-size: 13px; top: -14px; }
   .btn { font-size: 20px; padding: 16px 20px; }
   .result-name { font-size: 30px; }
   .oracle-verdict .verdict-text { font-size: 22px; }
-  body { font-size: 14px; }
+  body { font-size: var(--text-sm); }
 }
 
 @media (min-width: 640px) {
-  .header { padding: 52px 0 0; }
-  .header h1 { font-size: 64px; }
-  .header-seal { width: 54px; height: 54px; font-size: 22px; line-height: 48px; top: -28px; }
-  .header .subtitle { font-size: 18px; }
+  .header { padding: 56px 0 0; }
+  .header h1 { font-size: 60px; }
+  .header-seal { width: 50px; height: 50px; font-size: 20px; top: -26px; }
+  .header .subtitle { font-size: 17px; }
   .result-photo { height: 320px; }
   .result-name { font-size: 48px; }
-  .oracle-verdict .verdict-text { font-size: 34px; }
-  .btn { font-size: 28px; padding: 24px 32px; }
-  .btn-row { margin: 12px 0 32px; }
-  .result-card { padding: 40px 32px; }
-  body { font-size: 17px; }
+  .oracle-verdict .verdict-text { font-size: 32px; }
+  .btn { font-size: 26px; padding: 22px 32px; }
+  .btn-row { margin: 12px 0 36px; }
+  .result-card { padding: 44px 36px; }
+  body { font-size: var(--text-base); }
 }
 
 @media (min-width: 960px) {
-  .header { padding: 60px 0 0; }
-  .header h1 { font-size: 72px; }
-  .header-seal { width: 60px; height: 60px; font-size: 24px; line-height: 54px; top: -32px; margin-left: 12px; }
-  .result-photo { height: 400px; }
-  .result-card { padding: 44px 40px; }
-  .oracle-verdict .verdict-text { font-size: 38px; }
-  body { font-size: 18px; }
+  .header { padding: 64px 0 0; max-width: 720px; }
+  .header h1 { font-size: 68px; }
+  .header-seal { width: 56px; height: 56px; font-size: 22px; top: -30px; }
+  .result-photo { height: 380px; }
+  .result-card { padding: 48px 44px; max-width: 720px; }
+  .oracle-verdict .verdict-text { font-size: 36px; }
+  body { font-size: var(--text-md); }
 }
 </style>
 </head>
 <body>
 
-<!-- 宣纸纹理层 -->
-<div class="texture-layer" aria-hidden="true"></div>
+<main class="container">
 
-<div class="container" role="main">
-
-  <!-- 头部 -->
-  <div class="header">
+  <!-- Header -->
+  <header class="header">
     <div class="header-inner">
       <h1>今天吃什么<span class="header-seal" aria-hidden="true">食</span></h1>
     </div>
     <p class="subtitle">掷 筊 问 食 神</p>
     <div class="header-rule" aria-hidden="true"></div>
-  </div>
+  </header>
 
-  <!-- 摇一摇提示 -->
+  <!-- Shake hint -->
   <div class="shake-hint" id="shakeHint">📳 摇一摇手机，摇签筒问食神</div>
 
-  <!-- 位置状态 -->
+  <!-- Location -->
   <div class="location-row">
     <div class="location-status" id="locationStatus" role="status" aria-live="polite">
       <span class="dot" id="locationDot"></span>
@@ -1220,21 +1330,21 @@ body::after {
     <button class="api-config-toggle" id="apiConfigToggle" aria-label="修改高德地图API配置">修改API配置</button>
   </div>
 
-  <!-- API Key 设置 -->
+  <!-- API Key -->
   <div class="api-key-section hidden" id="apiKeySection">
     <label>高德地图 API Key 和安全密钥</label>
     <p class="help-text">
       前往 <a href="https://console.amap.com/" target="_blank" rel="noopener noreferrer">高德开放平台</a> 申请 Key（选择「Web端 JS API」），创建后会同时提供 Key 和 <strong>安全密钥</strong>
     </p>
-    <label style="font-size:14px;color:var(--text-dim);display:block;margin-bottom:6px;text-align:left;font-weight:400;">API Key</label>
+    <label class="api-sub-label">API Key</label>
     <input type="text" id="apiKeyInput" placeholder="粘贴 API Key">
-    <label style="font-size:14px;color:var(--text-dim);display:block;margin-bottom:6px;margin-top:10px;text-align:left;font-weight:400;">安全密钥 (securityJsCode)</label>
+    <label class="api-sub-label api-sub-label--gap">安全密钥 (securityJsCode)</label>
     <input type="text" id="securityCodeInput" placeholder="粘贴安全密钥">
-    <button class="btn btn-primary" id="saveApiKeyBtn" style="width:100%;margin-top:14px;padding:12px;font-size:16px;">保存并重新加载</button>
-    <p style="font-size:14px;color:var(--text-dim);margin-top:10px;text-align:center;" id="apiKeyStatus"></p>
+    <button class="btn btn-primary api-save-btn" id="saveApiKeyBtn">保存并重新加载</button>
+    <p class="api-status-text" id="apiKeyStatus"></p>
   </div>
 
-  <!-- 抽签数量 -->
+  <!-- Pick count -->
   <div class="pick-count-row">
     <span class="label">求签数</span>
     <button class="pick-count-btn active" data-count="1">一</button>
@@ -1242,12 +1352,12 @@ body::after {
     <button class="pick-count-btn" data-count="3">三</button>
   </div>
 
-  <!-- 掷筊按钮 -->
+  <!-- Main CTA -->
   <div class="btn-row">
     <button class="btn btn-primary" id="pickBtn" disabled aria-label="掷筊问食神">掷 筊 问 食</button>
   </div>
 
-  <!-- 结果卡片 — 宣纸卷轴 -->
+  <!-- Result Card - Bone White -->
   <div class="result-card" id="resultCard" aria-live="polite" aria-atomic="true">
     <div class="result-empty">
       <div class="empty-symbol">問</div>
@@ -1255,7 +1365,7 @@ body::after {
     </div>
   </div>
 
-  <!-- 操作按钮 -->
+  <!-- Actions -->
   <div class="result-actions hidden" id="resultActions">
     <button class="btn btn-secondary btn-sm" id="rerollBtn">再求一签</button>
     <button class="btn btn-secondary btn-sm" id="blacklistBtn">拉黑这家</button>
@@ -1263,11 +1373,11 @@ body::after {
     <button class="btn btn-secondary btn-sm" id="shareBtn">分享</button>
   </div>
 
-  <!-- 筛选设置 -->
+  <!-- Filters -->
   <div class="section">
     <div class="section-header" id="filterHeader" role="button" tabindex="0" aria-expanded="true">
       <h2>筛选设置</h2>
-      <span class="arrow open" id="filterArrow">▼</span>
+      <span class="arrow open" id="filterArrow">&#9660;</span>
     </div>
     <div class="section-body open" id="filterBody">
       <div class="filter-row">
@@ -1290,7 +1400,7 @@ body::after {
         </div>
       </div>
       <div class="filter-row">
-        <div class="filter-label"><span>菜系偏好</span><span id="cuisineHint" style="font-size:14px;color:var(--text-muted);font-weight:400;">不选则不限</span></div>
+        <div class="filter-label"><span>菜系偏好</span><span id="cuisineHint" class="filter-hint">不选则不限</span></div>
         <div class="cuisine-tags" id="cuisineTags">
           <span class="cuisine-tag" data-keyword="火锅">火锅</span>
           <span class="cuisine-tag" data-keyword="川菜">川菜</span>
@@ -1309,13 +1419,13 @@ body::after {
     </div>
   </div>
 
-  <!-- 底部三栏 -->
+  <!-- Bottom 3-col grid -->
   <div class="bottom-sections-grid">
 
   <div class="section">
     <div class="section-header" id="historyHeader" role="button" tabindex="0" aria-expanded="false">
       <h2>历史记录（近7天）</h2>
-      <span class="arrow" id="historyArrow">▼</span>
+      <span class="arrow" id="historyArrow">&#9660;</span>
     </div>
     <div class="section-body" id="historyBody">
       <div id="historyList"><div class="list-empty">暂无记录</div></div>
@@ -1326,7 +1436,7 @@ body::after {
   <div class="section">
     <div class="section-header" id="blacklistHeader" role="button" tabindex="0" aria-expanded="false">
       <h2>黑名单</h2>
-      <span class="arrow" id="blacklistArrow">▼</span>
+      <span class="arrow" id="blacklistArrow">&#9660;</span>
     </div>
     <div class="section-body" id="blacklistBody">
       <div id="blacklistList"><div class="list-empty">暂无拉黑</div></div>
@@ -1336,38 +1446,37 @@ body::after {
   <div class="section">
     <div class="section-header" id="favHeader" role="button" tabindex="0" aria-expanded="false">
       <h2>想去</h2>
-      <span class="arrow" id="favArrow">▼</span>
+      <span class="arrow" id="favArrow">&#9660;</span>
     </div>
     <div class="section-body" id="favBody">
       <div id="favList"><div class="list-empty">暂无收藏</div></div>
     </div>
   </div>
 
-  </div><!-- /bottom-sections-grid -->
+  </div>
 
-  <div class="footer">Powered by 高德地图 · 食神占卜 · 数据仅供参考</div>
+  <footer class="footer">Powered by 高德地图 - 食神占卜 - 数据仅供参考</footer>
 
-  <!-- 调试面板 -->
+  <!-- Debug -->
   <div class="section" id="debugPanel">
     <div class="section-header" id="debugHeader" role="button" tabindex="0" aria-expanded="false">
       <h2>调试信息</h2>
-      <span class="arrow" id="debugArrow">▼</span>
+      <span class="arrow" id="debugArrow">&#9660;</span>
     </div>
     <div class="section-body" id="debugBody">
       <pre id="debugContent"></pre>
     </div>
   </div>
 
-  <!-- 通用加载 -->
+  <!-- Spinner -->
   <div class="spinner-overlay hidden" id="spinner">
     <div class="spinner"></div>
     <div class="spinner-text" id="spinnerText">搜索中...</div>
   </div>
 
-  <!-- 占卜仪式层（动态插入） -->
-  <!-- 金光爆发层 -->
+  <!-- Ritual flash layer -->
   <div class="ritual-flash hidden" id="ritualFlash" aria-hidden="true"></div>
-</div>
+</main>
 
 <script>
 (function() {
@@ -1540,7 +1649,7 @@ function debounce(fn, ms) {
 const debouncedSaveSettings = debounce(function() { saveJSON(SETTINGS_KEY, settings); }, 150);
 
 // ============================================
-// 食神判词系统
+// Oracle Verdict System
 // ============================================
 function generateVerdict(restaurant) {
   const rating = getRating(restaurant);
@@ -1550,7 +1659,6 @@ function generateVerdict(restaurant) {
   const name = restaurant.name || '';
   const hour = new Date().getHours();
 
-  // 根据时段选开头
   const timePrefixes = [];
   if (hour >= 6 && hour < 10) timePrefixes.push('晨光初现', '朝食为天', '一日之计');
   else if (hour >= 10 && hour < 14) timePrefixes.push('午时已到', '正午当食', '日中而食');
@@ -1558,7 +1666,6 @@ function generateVerdict(restaurant) {
   else if (hour >= 17 && hour < 21) timePrefixes.push('华灯初上', '暮色将至', '晚来天欲');
   else timePrefixes.push('夜深人静', '宵夜正当时', '星月为伴');
 
-  // 基于评分的判词
   const ratingPhrases = rating >= 4.5
     ? ['此店有贵人相助之相', '紫气东来，此为上选', '五星聚顶，大吉之兆']
     : rating >= 4.0
@@ -1567,21 +1674,18 @@ function generateVerdict(restaurant) {
     ? ['中平之签，果腹足矣', '不求有功但求无过', '寻常滋味，亦有其道']
     : ['随缘而食，自有惊喜', '粗茶淡饭，亦是修行', '莫计较小节，且去便是'];
 
-  // 基于距离的判词
   const distPhrases = dist < 500
     ? ['近在咫尺，乃命中注定', '举步即至，此乃天意', '眼前即是，何必远求']
     : dist < 1500
     ? ['不远不近，恰到好处', '几步之遥，缘分使然', '行不多远，美味即达']
     : ['虽远必达，诚意动天', '路途虽遥，佳肴相候', '远方有食，值得奔赴'];
 
-  // 基于价格的判词
   const costPhrases = cost > 0
     ? (cost < 40 ? ['价廉物美，百姓之福', '平民之价，不俗之味'] :
        cost < 100 ? ['中庸之道，丰俭由人', '物有所值，不失体面'] :
        ['贵人聚所，宴客之选', '金樽清酒，玉盘珍羞'])
     : [];
 
-  // 基于菜系的判词
   const typeMap = {
     '火锅': ['红汤沸腾，如人生热烈', '围炉而坐，人间烟火', '一锅煮沸江湖'],
     '川菜': ['麻辣鲜香，蜀地真味', '天府之国，味在四川'],
@@ -1598,7 +1702,6 @@ function generateVerdict(restaurant) {
     ? typeMap[typeLabel]
     : (typeLabel ? [typeLabel + '，今日之选', '随遇而食，' + typeLabel + '正当时'] : []);
 
-  // 全部候选池
   const allPhrases = [
     ...ratingPhrases, ...distPhrases, ...costPhrases, ...typePhrases,
     '食神引你至此，莫要犹豫',
@@ -1613,17 +1716,15 @@ function generateVerdict(restaurant) {
     '佳肴在前，岂可辜负',
   ];
 
-  // 随机选一个
   const idx = Math.floor(Math.random() * allPhrases.length);
   return allPhrases[idx];
 }
 
 // ============================================
-// 占卜仪式动画
+// Oracle Ritual Animation
 // ============================================
 function showOracleRitual(restaurantName) {
   return new Promise((resolve) => {
-    // 移除旧仪式层
     const old = document.querySelector('.oracle-ritual');
     if (old) old.remove();
 
@@ -1632,7 +1733,6 @@ function showOracleRitual(restaurantName) {
     ritual.setAttribute('aria-label', '食神占卜中...');
     ritual.setAttribute('role', 'alertdialog');
 
-    // 取名的第一个字作为符文
     const glyph = restaurantName ? restaurantName.charAt(0) : '食';
 
     ritual.innerHTML = `
@@ -1657,17 +1757,13 @@ function showOracleRitual(restaurantName) {
 
     document.body.appendChild(ritual);
 
-    // 金光爆发
     setTimeout(() => {
       dom.ritualFlash.classList.remove('hidden');
-      dom.ritualFlash.classList.add('ritual-flash');
-      // 重新触发动画
       dom.ritualFlash.style.animation = 'none';
       dom.ritualFlash.offsetHeight;
       dom.ritualFlash.style.animation = 'flashBurst 0.8s ease-out forwards';
     }, 2800);
 
-    // 仪式持续约3.5秒
     setTimeout(() => {
       ritual.remove();
       dom.ritualFlash.classList.add('hidden');
@@ -1677,7 +1773,7 @@ function showOracleRitual(restaurantName) {
 }
 
 // ============================================
-// 摇一摇
+// Shake Detection
 // ============================================
 let shakeEnabled = false;
 let lastShakeTime = 0;
@@ -1685,16 +1781,12 @@ const SHAKE_COOLDOWN = 4000;
 const SHAKE_THRESHOLD = 18;
 
 function initShakeDetection() {
-  // 只在移动设备上启用
   const isMobile = /Mobi|Android/i.test(navigator.userAgent);
   if (!isMobile) return;
 
-  // 检查是否支持 DeviceMotion
   if (typeof DeviceMotionEvent === 'undefined') return;
 
-  // 检测是否需要权限（iOS 13+）
   if (typeof DeviceMotionEvent.requestPermission === 'function') {
-    // iOS — 需要用户手势触发，先显示提示
     dom.shakeHint.classList.add('visible');
     dom.shakeHint.textContent = '📳 点击页面任意处启用"摇一摇"';
 
@@ -1711,7 +1803,6 @@ function initShakeDetection() {
     };
     document.addEventListener('click', enableShake, { once: true });
   } else {
-    // Android — 直接启用
     shakeEnabled = true;
     dom.shakeHint.classList.add('visible');
   }
@@ -1737,7 +1828,6 @@ function initShakeDetection() {
     const magnitude = Math.sqrt(deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ);
 
     if (magnitude > SHAKE_THRESHOLD) {
-      // 累积检测 — 需要连续2次超过阈值
       setTimeout(() => {
         const deltaX2 = Math.abs((e.accelerationIncludingGravity?.x || acc.x) - lastX);
         const deltaY2 = Math.abs((e.accelerationIncludingGravity?.y || acc.y) - lastY);
@@ -1998,7 +2088,7 @@ function displayResult(restaurant) {
       <div class="result-empty">
         <div class="empty-symbol">空</div>
         <p>附近没找到合适的餐厅</p>
-        <p style="font-size:14px;margin-top:6px;">试试放宽筛选条件或扩大搜索范围</p>
+        <p class="result-hint">试试放宽筛选条件或扩大搜索范围</p>
       </div>`;
     dom.resultActions.classList.add('hidden');
     return;
@@ -2020,7 +2110,7 @@ function displayResult(restaurant) {
   const verdict = generateVerdict(restaurant);
 
   dom.resultCard.innerHTML = `
-    ${photoUrl ? '<img class="result-photo" src="' + photoUrl + '" alt="' + escapeHtml(restaurant.name) + '" loading="lazy" onerror="this.style.display=\'none\'">' : ''}
+    ${photoUrl ? '<img class="result-photo" src="' + photoUrl + '" alt="' + escapeHtml(restaurant.name) + '" loading="lazy" onerror="this.classList.add(\'hidden\')">' : ''}
     <div class="result-name">${escapeHtml(restaurant.name)}</div>
     <div class="result-stars">
       ${renderStars(rating)}
@@ -2053,14 +2143,14 @@ function displayResult(restaurant) {
 
 function displayMultiResult(restaurants) {
   dom.resultCard.classList.add('has-result');
-  let html = '<div style="text-align:center;font-weight:700;margin-bottom:14px;font-size:18px;color:var(--ink-text);">食神为你选出 ' + restaurants.length + ' 家</div>';
+  let html = '<div class="mr-count-header">食神为你选出 ' + restaurants.length + ' 家</div>';
   html += restaurants.map(function(r, i) {
     const rating = getRating(r);
     const cost = getCost(r);
     const dist = r.distance || 0;
     const typeLabel = getTypeLabel(r.type);
     const navUrl = getNavUrl(r);
-    const starsHtml = rating > 0 ? '<span style="color:#a08950;">★ ' + rating.toFixed(1) + '</span>' : '';
+    const starsHtml = rating > 0 ? '<span class="star-badge">★ ' + rating.toFixed(1) + '</span>' : '';
     return '<div class="multi-result-item">' +
       '<div class="mr-header">' +
         '<span class="mr-name">' + (i + 1) + '. ' + escapeHtml(r.name) + '</span>' +
@@ -2069,7 +2159,7 @@ function displayMultiResult(restaurants) {
       '<div class="mr-meta">' +
         (dist > 0 ? '<span>' + formatDistance(dist) + '</span>' : '') +
         (cost > 0 ? '<span>人均 ¥' + cost + '</span>' : '') +
-        (typeLabel ? '<span style="color:#a08950;">' + escapeHtml(typeLabel) + '</span>' : '') +
+        (typeLabel ? '<span class="mr-type-label">' + escapeHtml(typeLabel) + '</span>' : '') +
       '</div>' +
       (r.address ? '<div class="mr-address">' + escapeHtml(r.address) + '</div>' : '') +
       '<div class="mr-actions">' +
@@ -2101,10 +2191,10 @@ function displayMultiResult(restaurants) {
 
 function renderMetaChips(item, opts) {
   const chips = [];
-  if (item.rating > 0) chips.push('<span style="color:#a08950;">★ ' + item.rating.toFixed(1) + '</span>');
+  if (item.rating > 0) chips.push('<span class="star-badge">★ ' + item.rating.toFixed(1) + '</span>');
   if (item.distance > 0) chips.push('<span>' + formatDistance(item.distance) + '</span>');
   if (item.cost > 0) chips.push('<span>¥' + item.cost + '</span>');
-  if (item.typeLabel) chips.push('<span style="color:#a08950;">' + escapeHtml(item.typeLabel) + '</span>');
+  if (item.typeLabel) chips.push('<span class="chip-type-label">' + escapeHtml(item.typeLabel) + '</span>');
   if (opts && opts.showPickCount && item.pickCount > 1) chips.push('<span>' + item.pickCount + '次</span>');
   return chips.join('');
 }
@@ -2147,7 +2237,7 @@ function renderMiniMap(container, poi) {
 }
 
 // ============================================
-// Main Action — 带占卜仪式
+// Main Action - with oracle ritual
 // ============================================
 async function doPick() {
   if (state.isSearching) return;
@@ -2186,7 +2276,6 @@ async function doPick() {
         const pick = pickRandom(state.candidates, settings.pickCount);
         const displayName = Array.isArray(pick) ? pick[0]?.name || '餐厅' : pick?.name || '餐厅';
 
-        // 占卜仪式动画
         await showOracleRitual(displayName);
 
         displayResult(pick);
@@ -2200,7 +2289,6 @@ async function doPick() {
     }
   } catch (err) {
     hideSpinner();
-    // 清理可能残留的仪式层
     const ritualEl = document.querySelector('.oracle-ritual');
     if (ritualEl) ritualEl.remove();
     displayResult(null);
@@ -2380,11 +2468,9 @@ function getFavData(restaurant) {
 
 function updateFavResultBtn() {
   if (!state.currentResult) return;
-  if (isFavorite(state.currentResult.id)) {
-    dom.favResultBtn.textContent = '已收藏'; dom.favResultBtn.style.color = '#c4a35a';
-  } else {
-    dom.favResultBtn.textContent = '想去'; dom.favResultBtn.style.color = '';
-  }
+  var faved = isFavorite(state.currentResult.id);
+  dom.favResultBtn.textContent = faved ? '已收藏' : '想去';
+  dom.favResultBtn.classList.toggle('faved', faved);
 }
 
 function renderFavorites() {

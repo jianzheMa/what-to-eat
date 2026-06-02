@@ -28,50 +28,41 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  /* 底色系统 — 墨色深处 */
-  --ink-deep: #0d0b08;
-  --ink: #161310;
-  --ink-wash: #1f1a14;
-  --ink-light: #2a241c;
+  --ink-deep: #0a0705;
+  --ink: #14100d;
+  --ink-wash: #1e1814;
+  --ink-light: #2c2420;
 
-  /* 宣纸色 — 结果卡片 */
-  --paper: #f3ead8;
-  --paper-dim: #e8dcc8;
-  --paper-dark: #d4c5a9;
+  --paper: #faf3e6;
+  --paper-dim: #efe4d0;
+  --paper-dark: #d4c0a0;
 
-  /* 金箔 — 高光点缀 */
-  --gold: #c4a35a;
-  --gold-bright: #d4b96a;
-  --gold-pale: #a08950;
-  --gold-glow: rgba(196, 163, 90, 0.3);
+  --gold: #d4b96a;
+  --gold-bright: #e8cd7a;
+  --gold-pale: #b8963e;
+  --gold-glow: rgba(212, 185, 106, 0.4);
 
-  /* 朱砂 — 印章 & 判词 */
-  --vermillion: #b83a2a;
-  --vermillion-bright: #c94a3a;
-  --vermillion-dark: #8b2218;
-  --vermillion-glow: rgba(184, 58, 42, 0.25);
+  --vermillion: #d44030;
+  --vermillion-bright: #e84c3c;
+  --vermillion-dark: #a02018;
+  --vermillion-glow: rgba(212, 64, 48, 0.35);
 
-  /* 烟墨 — 文字 */
-  --ink-text: #2c2418;
-  --ink-text-dim: #5c5242;
-  --ink-text-muted: #8a7e6e;
+  --ink-text: #1a1008;
+  --ink-text-dim: #3d3020;
+  --ink-text-muted: #6b5a48;
 
-  /* 浅色文字（用于深色底） */
-  --text: #e8dfcc;
-  --text-dim: #b0a590;
-  --text-muted: #7a7060;
-  --text-faint: #554c40;
+  --text: #f5efe0;
+  --text-dim: #d4cdb8;
+  --text-muted: #b0a590;
+  --text-faint: #8a7e6e;
 
-  /* 边框 */
-  --border-ink: #2e2820;
-  --border-paper: #d4c5a9;
-  --border-gold: rgba(196, 163, 90, 0.4);
+  --border-ink: #332c24;
+  --border-paper: #d4c0a0;
+  --border-gold: rgba(212, 185, 106, 0.5);
 
-  /* 其他 */
-  --star: #c4a35a;
-  --danger: #b83a2a;
-  --success: #6b9080;
-  --radius: 3px;
+  --star: #d4b96a;
+  --danger: #d44030;
+  --success: #7aac90;
 
   --font-oracle: 'Ma Shan Zheng', 'KaiTi', 'STKaiti', cursive;
   --font-verdict: 'ZCOOL XiaoWei', 'KaiTi', 'STKaiti', serif;
@@ -85,11 +76,12 @@ body {
   background: var(--ink-deep);
   color: var(--text);
   min-height: 100vh; min-height: 100dvh;
-  line-height: 1.7;
+  line-height: 1.75;
+  font-size: 16px;
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior-y: contain;
   -webkit-font-smoothing: antialiased;
-  font-weight: 300;
+  font-weight: 400;
   overflow-x: hidden;
 }
 
@@ -162,8 +154,8 @@ body::after {
 @media (min-width: 640px) {
   .container { max-width: 620px; padding: 28px 24px 48px; }
 }
-@media (min-width: 900px) {
-  .container { max-width: 920px; padding: 36px 32px 56px; }
+@media (min-width: 960px) {
+  .container { max-width: 960px; padding: 40px 36px 64px; }
 }
 
 /* ============================================
@@ -182,14 +174,13 @@ body::after {
 /* 主标题 — 如匾额大字 */
 .header h1 {
   font-family: var(--font-oracle);
-  font-size: 44px;
+  font-size: 52px;
   font-weight: 400;
-  color: var(--gold);
-  letter-spacing: 0.12em;
+  color: var(--gold-bright);
+  letter-spacing: 0.14em;
   text-shadow:
-    0 0 80px var(--gold-glow),
-    0 2px 4px rgba(0,0,0,0.6),
-    0 1px 0 rgba(196, 163, 90, 0.15);
+    0 0 100px var(--gold-glow),
+    0 2px 8px rgba(0,0,0,0.7);
   line-height: 1.2;
   position: relative;
 }
@@ -221,10 +212,10 @@ body::after {
 
 .header .subtitle {
   color: var(--text-dim);
-  font-size: 13px;
-  margin-top: 4px;
-  letter-spacing: 0.2em;
-  font-weight: 300;
+  font-size: 16px;
+  margin-top: 6px;
+  letter-spacing: 0.22em;
+  font-weight: 400;
 }
 
 /* 匾额下的装饰横线 — 手绘感 */
@@ -268,10 +259,10 @@ body::after {
 .location-status {
   display: flex;
   align-items: center;
-  gap: 7px;
-  font-size: 11px;
+  gap: 8px;
+  font-size: 14px;
   color: var(--text-dim);
-  padding: 6px 16px;
+  padding: 7px 18px;
   background: var(--ink);
   border: 1px solid var(--border-ink);
   border-radius: 2px;
@@ -297,18 +288,18 @@ body::after {
   background: none;
   border: 1px solid var(--border-ink);
   color: var(--text-muted);
-  padding: 5px 14px;
+  padding: 6px 16px;
   border-radius: 2px;
-  font-size: 11px;
+  font-size: 14px;
   cursor: pointer;
   transition: all 0.3s;
   font-family: var(--font-body);
-  font-weight: 300;
+  font-weight: 400;
   letter-spacing: 0.04em;
 }
 .api-config-toggle:hover {
-  border-color: var(--gold-pale);
-  color: var(--gold);
+  border-color: var(--gold);
+  color: var(--gold-bright);
 }
 
 /* ---- API Key 区块 ---- */
@@ -322,25 +313,25 @@ body::after {
 }
 .api-key-section label {
   display: block;
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 600;
-  margin-bottom: 6px;
-  color: var(--gold);
-  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+  color: var(--gold-bright);
+  letter-spacing: 0.06em;
 }
 .api-key-section .help-text {
-  font-size: 11px;
+  font-size: 14px;
   color: var(--text-dim);
-  margin-bottom: 14px;
+  margin-bottom: 16px;
   line-height: 1.8;
 }
-.api-key-section a { color: var(--vermillion-bright); font-weight: 600; }
+.api-key-section a { color: var(--vermillion-bright); font-weight: 700; }
 .api-key-section input[type="text"] {
   width: 100%;
-  padding: 10px 12px;
+  padding: 12px 14px;
   border: 1px solid var(--border-ink);
   border-radius: 2px;
-  font-size: 13px;
+  font-size: 16px;
   background: var(--ink-deep);
   color: var(--text);
   outline: none;
@@ -361,26 +352,26 @@ body::after {
   margin-bottom: 16px;
 }
 .pick-count-row .label {
-  font-size: 12px;
+  font-size: 15px;
   color: var(--text-dim);
-  margin-right: 6px;
-  letter-spacing: 0.06em;
+  margin-right: 8px;
+  letter-spacing: 0.08em;
 }
 .pick-count-btn {
-  width: 32px; height: 32px;
+  width: 38px; height: 38px;
   border-radius: 2px;
-  border: 1px solid var(--border-ink);
+  border: 1.5px solid var(--border-ink);
   background: var(--ink);
   color: var(--text-dim);
   font-weight: 600;
-  font-size: 13px;
+  font-size: 16px;
   cursor: pointer;
   transition: all 0.3s;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-family: var(--font-body);
-  margin: 0 2px;
+  margin: 0 3px;
 }
 .pick-count-btn.active {
   background: var(--gold);
@@ -404,16 +395,16 @@ body::after {
 }
 .btn {
   flex: 1;
-  padding: 20px 28px;
+  padding: 22px 28px;
   border: none;
   border-radius: 3px;
-  font-size: 22px;
+  font-size: 26px;
   font-weight: 400;
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   text-align: center;
   font-family: var(--font-oracle);
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   position: relative;
   overflow: hidden;
 }
@@ -482,18 +473,18 @@ body::after {
   border: 1px solid var(--border-ink);
   font-family: var(--font-body);
   font-weight: 400;
-  font-size: 12px;
+  font-size: 15px;
   letter-spacing: 0.04em;
   border-radius: 2px;
 }
 .btn-secondary:hover {
-  border-color: var(--gold-pale);
-  color: var(--gold);
+  border-color: var(--gold);
+  color: var(--gold-bright);
   background: var(--ink-wash);
 }
 .btn-sm {
-  padding: 8px 16px;
-  font-size: 11px;
+  padding: 10px 18px;
+  font-size: 14px;
 }
 
 /* ============================================
@@ -545,25 +536,26 @@ body::after {
 }
 
 .result-empty {
-  padding: 28px 16px;
+  padding: 36px 20px;
   color: var(--ink-text-dim);
   position: relative; z-index: 1;
+  font-size: 16px;
 }
 .result-empty .empty-symbol {
   font-family: var(--font-oracle);
-  font-size: 48px;
+  font-size: 60px;
   color: var(--ink-text-muted);
-  margin-bottom: 10px;
-  opacity: 0.5;
+  margin-bottom: 12px;
+  opacity: 0.4;
 }
 
 /* 餐厅名 */
 .result-name {
   font-family: var(--font-oracle);
-  font-size: 32px;
+  font-size: 42px;
   font-weight: 400;
   color: var(--ink-text);
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   letter-spacing: 0.06em;
   line-height: 1.3;
   position: relative; z-index: 1;
@@ -572,18 +564,18 @@ body::after {
 /* 评分星星 */
 .result-stars {
   display: inline-flex;
-  gap: 2px;
-  margin-bottom: 10px;
-  font-size: 15px;
+  gap: 3px;
+  margin-bottom: 12px;
+  font-size: 18px;
   color: var(--gold-pale);
   align-items: center;
   position: relative; z-index: 1;
 }
 .result-stars .score {
-  font-size: 14px;
+  font-size: 18px;
   font-weight: 700;
   color: var(--ink-text);
-  margin-left: 6px;
+  margin-left: 8px;
   font-family: var(--font-body);
 }
 
@@ -591,30 +583,30 @@ body::after {
 .result-meta {
   display: flex;
   justify-content: center;
-  gap: 20px;
-  font-size: 13px;
+  gap: 24px;
+  font-size: 15px;
   color: var(--ink-text-dim);
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   flex-wrap: wrap;
   position: relative; z-index: 1;
 }
 .result-meta span { white-space: nowrap; }
 .result-address {
-  font-size: 12px;
+  font-size: 14px;
   color: var(--ink-text-dim);
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   position: relative; z-index: 1;
 }
 .result-type {
   display: inline-block;
-  padding: 3px 12px;
-  background: rgba(196, 163, 90, 0.15);
-  color: var(--gold-pale);
-  border: 1px solid rgba(196, 163, 90, 0.3);
+  padding: 4px 14px;
+  background: rgba(212, 185, 106, 0.18);
+  color: #8b6d2e;
+  border: 1px solid rgba(212, 185, 106, 0.35);
   border-radius: 2px;
-  font-size: 11px;
-  font-weight: 600;
-  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  margin-top: 10px;
   position: relative; z-index: 1;
 }
 
@@ -622,18 +614,22 @@ body::after {
    食神判词
    ============================================ */
 .oracle-verdict {
-  margin: 16px 0 6px;
-  padding: 14px 8px;
+  margin: 24px 0 10px;
+  padding: 20px 12px;
   position: relative; z-index: 1;
   text-align: center;
+  background: rgba(212, 64, 48, 0.05);
+  border-top: 2px solid rgba(212, 64, 48, 0.25);
+  border-bottom: 2px solid rgba(212, 64, 48, 0.25);
 }
 .oracle-verdict .verdict-text {
   font-family: var(--font-verdict);
-  font-size: 20px;
+  font-size: 30px;
   color: var(--vermillion);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   line-height: 1.6;
-  text-shadow: 0 1px 2px rgba(184, 58, 42, 0.15);
+  font-weight: 400;
+  text-shadow: 0 2px 4px rgba(184, 40, 20, 0.15);
   animation: verdictInk 0.8s ease-out 0.3s both;
 }
 @keyframes verdictInk {
@@ -660,12 +656,21 @@ body::after {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  margin-bottom: 10px;
+  gap: 16px;
+  margin-bottom: 14px;
   color: var(--vermillion);
-  opacity: 0.4;
-  font-size: 10px;
-  letter-spacing: 6px;
+  font-size: 14px;
+  letter-spacing: 8px;
+  font-weight: 700;
+  opacity: 0.7;
+}
+.oracle-verdict-deco::before,
+.oracle-verdict-deco::after {
+  content: '';
+  display: block;
+  width: 30px; height: 2px;
+  background: var(--vermillion);
+  opacity: 0.5;
 }
 
 /* 操作按钮区 */
@@ -704,16 +709,16 @@ body::after {
   position: relative; z-index: 1;
 }
 .result-nav-btn {
-  display: inline-flex; align-items: center; gap: 4px;
-  padding: 10px 22px;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 12px 26px;
   background: var(--ink-text);
   color: var(--paper);
   border: none; border-radius: 2px;
-  font-size: 13px; font-weight: 600;
+  font-size: 16px; font-weight: 700;
   cursor: pointer; text-decoration: none;
   transition: all 0.3s;
   font-family: var(--font-body);
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
 }
 .result-nav-btn:hover {
   background: #1a1a1a;
@@ -734,28 +739,28 @@ body::after {
   align-items: flex-start; gap: 10px;
 }
 .multi-result-item .mr-name {
-  font-size: 15px; font-weight: 700; flex: 1;
+  font-size: 17px; font-weight: 700; flex: 1;
   font-family: var(--font-body);
 }
 .multi-result-item .mr-stars {
-  font-size: 13px; color: var(--gold-pale); white-space: nowrap;
+  font-size: 15px; color: var(--gold-pale); white-space: nowrap;
 }
 .multi-result-item .mr-meta {
-  font-size: 12px; color: var(--ink-text-dim);
-  margin-top: 4px; display: flex; gap: 14px; flex-wrap: wrap;
+  font-size: 14px; color: var(--ink-text-dim);
+  margin-top: 6px; display: flex; gap: 16px; flex-wrap: wrap;
 }
 .multi-result-item .mr-address {
-  font-size: 11px; color: var(--ink-text-dim); margin-top: 2px;
+  font-size: 13px; color: var(--ink-text-dim); margin-top: 4px;
 }
 .multi-result-item .mr-actions {
-  margin-top: 8px; display: flex; gap: 8px;
+  margin-top: 10px; display: flex; gap: 10px;
 }
 .multi-result-item .mr-nav {
-  font-size: 12px; color: var(--gold-pale); text-decoration: none; font-weight: 600;
+  font-size: 14px; color: var(--gold-pale); text-decoration: none; font-weight: 700;
 }
 .multi-result-item .mr-blacklist {
-  font-size: 12px; color: var(--vermillion);
-  background: none; border: none; cursor: pointer; font-weight: 600;
+  font-size: 14px; color: var(--vermillion);
+  background: none; border: none; cursor: pointer; font-weight: 700;
   font-family: var(--font-body);
 }
 
@@ -787,14 +792,14 @@ body::after {
   align-items: center; cursor: pointer; user-select: none;
 }
 .section-header h2 {
-  font-size: 13px; font-weight: 600;
+  font-size: 16px; font-weight: 600;
   color: var(--text-dim);
   font-family: var(--font-body);
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
 }
 .section-header .arrow {
   transition: transform 0.3s;
-  font-size: 9px; color: var(--text-muted);
+  font-size: 12px; color: var(--text-muted);
 }
 .section-header .arrow.open { transform: rotate(180deg); }
 .section-body { margin-top: 14px; display: none; }
@@ -805,11 +810,11 @@ body::after {
 .filter-row:last-child { margin-bottom: 0; }
 .filter-label {
   display: flex; justify-content: space-between;
-  font-size: 12px; font-weight: 600;
-  margin-bottom: 7px; color: var(--text-dim);
+  font-size: 15px; font-weight: 600;
+  margin-bottom: 8px; color: var(--text-dim);
   letter-spacing: 0.04em;
 }
-.filter-label .value { color: var(--gold); font-weight: 700; }
+.filter-label .value { color: var(--gold-bright); font-weight: 700; }
 
 /* 滑块 */
 .filter-row input[type="range"] {
@@ -838,10 +843,10 @@ body::after {
   display: flex; flex-wrap: wrap; gap: 7px;
 }
 .price-chip, .cuisine-tag {
-  padding: 5px 14px;
-  border: 1px solid var(--border-ink);
+  padding: 6px 16px;
+  border: 1.5px solid var(--border-ink);
   border-radius: 2px;
-  font-size: 11px; cursor: pointer;
+  font-size: 14px; cursor: pointer;
   transition: all 0.25s;
   background: var(--ink-deep);
   color: var(--text-dim);
@@ -850,14 +855,14 @@ body::after {
   letter-spacing: 0.03em;
 }
 .price-chip.active, .cuisine-tag.active {
-  background: rgba(196, 163, 90, 0.12);
-  border-color: var(--gold-pale);
-  color: var(--gold);
-  font-weight: 600;
-  box-shadow: 0 0 8px rgba(196, 163, 90, 0.08);
+  background: rgba(212, 185, 106, 0.15);
+  border-color: var(--gold);
+  color: var(--gold-bright);
+  font-weight: 700;
+  box-shadow: 0 0 10px rgba(212, 185, 106, 0.1);
 }
 .price-chip:hover, .cuisine-tag:hover {
-  border-color: var(--gold-pale);
+  border-color: var(--gold);
   color: var(--text);
 }
 
@@ -871,36 +876,36 @@ body::after {
 .list-item:last-child { border-bottom: none; }
 .list-item:hover { background: rgba(196, 163, 90, 0.02); }
 .list-item .info { flex: 1; min-width: 0; }
-.list-item .name { font-size: 13px; font-weight: 600; color: var(--text); }
+.list-item .name { font-size: 15px; font-weight: 600; color: var(--text); }
 .list-item .meta {
-  font-size: 10px; color: var(--text-dim);
-  margin-top: 2px; display: flex; gap: 8px; flex-wrap: wrap;
+  font-size: 13px; color: var(--text-dim);
+  margin-top: 3px; display: flex; gap: 10px; flex-wrap: wrap;
 }
-.list-item .date { font-size: 10px; color: var(--text-muted); }
-.list-item .item-actions { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+.list-item .date { font-size: 13px; color: var(--text-muted); }
+.list-item .item-actions { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
 .list-item .fav-btn {
-  background: none; border: none; font-size: 15px; cursor: pointer;
-  padding: 4px 6px; border-radius: 2px; line-height: 1;
+  background: none; border: none; font-size: 18px; cursor: pointer;
+  padding: 4px 8px; border-radius: 2px; line-height: 1;
   transition: transform 0.2s, color 0.2s; color: var(--text-muted);
 }
 .list-item .fav-btn:hover { transform: scale(1.2); }
-.list-item .fav-btn.faved { color: var(--gold); }
+.list-item .fav-btn.faved { color: var(--gold-bright); }
 .list-item .remove-btn {
   background: none; border: none; color: var(--danger);
-  font-size: 18px; cursor: pointer; padding: 4px 8px;
+  font-size: 20px; cursor: pointer; padding: 4px 8px;
   border-radius: 2px; line-height: 1; transition: background 0.2s;
 }
-.list-item .remove-btn:hover { background: rgba(184, 58, 42, 0.08); }
+.list-item .remove-btn:hover { background: rgba(212, 64, 48, 0.1); }
 
 .list-empty {
-  text-align: center; padding: 22px;
-  color: var(--text-muted); font-size: 12px;
+  text-align: center; padding: 26px;
+  color: var(--text-muted); font-size: 14px;
 }
 .clear-btn {
   background: none; border: 1px solid var(--border-ink);
-  color: var(--text-muted); padding: 6px 14px;
-  border-radius: 2px; font-size: 10px; cursor: pointer;
-  margin-top: 10px; transition: all 0.3s;
+  color: var(--text-muted); padding: 8px 16px;
+  border-radius: 2px; font-size: 13px; cursor: pointer;
+  margin-top: 12px; transition: all 0.3s;
   font-family: var(--font-body); letter-spacing: 0.04em;
 }
 .clear-btn:hover { border-color: var(--danger); color: var(--danger); }
@@ -1052,11 +1057,11 @@ body::after {
 }
 
 .ritual-hint {
-  margin-top: 20px;
+  margin-top: 24px;
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 18px;
   color: var(--text-dim);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   animation: hintPulse 2s ease-in-out infinite;
 }
 @keyframes hintPulse {
@@ -1069,9 +1074,9 @@ body::after {
   display: none;
   text-align: center;
   margin-top: 8px;
-  font-size: 11px;
+  font-size: 14px;
   color: var(--text-muted);
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   animation: hintPulse 2.5s ease-in-out infinite;
 }
 .shake-hint.visible { display: block; }
@@ -1094,24 +1099,24 @@ body::after {
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 .spinner-text {
-  font-size: 13px; font-weight: 400;
+  font-size: 16px; font-weight: 400;
   color: var(--text-dim);
   font-family: var(--font-body);
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
 }
 
 /* Toast */
 .toast {
-  position: fixed; top: 28px; left: 50%;
+  position: fixed; top: 32px; left: 50%;
   transform: translateX(-50%);
   background: var(--ink-light);
   color: var(--text);
-  padding: 10px 24px;
-  border-radius: 2px;
-  font-size: 12px; font-weight: 400;
+  padding: 12px 28px;
+  border-radius: 3px;
+  font-size: 15px; font-weight: 400;
   z-index: 200;
   border: 1px solid var(--border-ink);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+  box-shadow: 0 10px 36px rgba(0,0,0,0.7);
   animation: toastIn 0.35s cubic-bezier(0.4, 0, 0.2, 1),
              toastOut 0.3s 2.4s ease-in forwards;
   white-space: nowrap;
@@ -1130,9 +1135,9 @@ body::after {
 
 /* 页脚 */
 .footer {
-  text-align: center; padding: 22px;
-  color: var(--text-faint); font-size: 10px;
-  letter-spacing: 0.08em;
+  text-align: center; padding: 24px;
+  color: var(--text-faint); font-size: 13px;
+  letter-spacing: 0.1em;
 }
 
 /* 调试面板 */
@@ -1153,34 +1158,37 @@ body::after {
 
 /* ---- 响应式 ---- */
 @media (max-width: 360px) {
-  .container { padding: 14px 12px 28px; }
-  .header h1 { font-size: 32px; }
-  .header-seal { width: 32px; height: 32px; font-size: 13px; line-height: 28px; top: -16px; }
-  .btn { font-size: 18px; padding: 16px 20px; }
-  .result-name { font-size: 26px; }
-  .oracle-verdict .verdict-text { font-size: 17px; }
+  .container { padding: 14px 12px 32px; }
+  .header h1 { font-size: 36px; }
+  .header-seal { width: 36px; height: 36px; font-size: 15px; line-height: 30px; top: -16px; }
+  .btn { font-size: 20px; padding: 16px 20px; }
+  .result-name { font-size: 30px; }
+  .oracle-verdict .verdict-text { font-size: 22px; }
+  body { font-size: 14px; }
 }
 
 @media (min-width: 640px) {
-  .header { padding: 44px 0 0; }
-  .header h1 { font-size: 56px; }
-  .header-seal { width: 48px; height: 48px; font-size: 20px; line-height: 44px; top: -24px; }
-  .header .subtitle { font-size: 15px; }
-  .result-photo { height: 300px; }
-  .result-name { font-size: 38px; }
-  .oracle-verdict .verdict-text { font-size: 24px; }
-  .btn { font-size: 24px; }
-  .btn-row { margin: 10px 0 28px; }
-  .result-card { padding: 34px 28px; }
-}
-
-@media (min-width: 900px) {
   .header { padding: 52px 0 0; }
   .header h1 { font-size: 64px; }
-  .header-seal { width: 54px; height: 54px; font-size: 22px; line-height: 50px; top: -28px; }
-  .result-photo { height: 360px; }
-  .result-card { padding: 40px 36px; }
-  .oracle-verdict .verdict-text { font-size: 26px; }
+  .header-seal { width: 54px; height: 54px; font-size: 22px; line-height: 48px; top: -28px; }
+  .header .subtitle { font-size: 18px; }
+  .result-photo { height: 320px; }
+  .result-name { font-size: 48px; }
+  .oracle-verdict .verdict-text { font-size: 34px; }
+  .btn { font-size: 28px; padding: 24px 32px; }
+  .btn-row { margin: 12px 0 32px; }
+  .result-card { padding: 40px 32px; }
+  body { font-size: 17px; }
+}
+
+@media (min-width: 960px) {
+  .header { padding: 60px 0 0; }
+  .header h1 { font-size: 72px; }
+  .header-seal { width: 60px; height: 60px; font-size: 24px; line-height: 54px; top: -32px; margin-left: 12px; }
+  .result-photo { height: 400px; }
+  .result-card { padding: 44px 40px; }
+  .oracle-verdict .verdict-text { font-size: 38px; }
+  body { font-size: 18px; }
 }
 </style>
 </head>
@@ -1218,12 +1226,12 @@ body::after {
     <p class="help-text">
       前往 <a href="https://console.amap.com/" target="_blank" rel="noopener noreferrer">高德开放平台</a> 申请 Key（选择「Web端 JS API」），创建后会同时提供 Key 和 <strong>安全密钥</strong>
     </p>
-    <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:4px;text-align:left;font-weight:400;">API Key</label>
+    <label style="font-size:14px;color:var(--text-dim);display:block;margin-bottom:6px;text-align:left;font-weight:400;">API Key</label>
     <input type="text" id="apiKeyInput" placeholder="粘贴 API Key">
-    <label style="font-size:11px;color:var(--text-dim);display:block;margin-bottom:4px;margin-top:10px;text-align:left;font-weight:400;">安全密钥 (securityJsCode)</label>
+    <label style="font-size:14px;color:var(--text-dim);display:block;margin-bottom:6px;margin-top:10px;text-align:left;font-weight:400;">安全密钥 (securityJsCode)</label>
     <input type="text" id="securityCodeInput" placeholder="粘贴安全密钥">
     <button class="btn btn-primary" id="saveApiKeyBtn" style="width:100%;margin-top:14px;padding:12px;font-size:16px;">保存并重新加载</button>
-    <p style="font-size:10px;color:var(--text-dim);margin-top:10px;text-align:center;" id="apiKeyStatus"></p>
+    <p style="font-size:14px;color:var(--text-dim);margin-top:10px;text-align:center;" id="apiKeyStatus"></p>
   </div>
 
   <!-- 抽签数量 -->
@@ -1282,7 +1290,7 @@ body::after {
         </div>
       </div>
       <div class="filter-row">
-        <div class="filter-label"><span>菜系偏好</span><span id="cuisineHint" style="font-size:10px;color:var(--text-muted);font-weight:400;">不选则不限</span></div>
+        <div class="filter-label"><span>菜系偏好</span><span id="cuisineHint" style="font-size:14px;color:var(--text-muted);font-weight:400;">不选则不限</span></div>
         <div class="cuisine-tags" id="cuisineTags">
           <span class="cuisine-tag" data-keyword="火锅">火锅</span>
           <span class="cuisine-tag" data-keyword="川菜">川菜</span>
@@ -1990,7 +1998,7 @@ function displayResult(restaurant) {
       <div class="result-empty">
         <div class="empty-symbol">空</div>
         <p>附近没找到合适的餐厅</p>
-        <p style="font-size:11px;margin-top:4px;">试试放宽筛选条件或扩大搜索范围</p>
+        <p style="font-size:14px;margin-top:6px;">试试放宽筛选条件或扩大搜索范围</p>
       </div>`;
     dom.resultActions.classList.add('hidden');
     return;

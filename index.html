@@ -111,6 +111,22 @@ body::after {
   z-index: 1;
 }
 
+/* 平板 — 适度加宽 */
+@media (min-width: 640px) {
+  .container {
+    max-width: 600px;
+    padding: 24px 24px 40px;
+  }
+}
+
+/* 桌面 — 充分利用屏幕宽度 */
+@media (min-width: 900px) {
+  .container {
+    max-width: 900px;
+    padding: 28px 32px 48px;
+  }
+}
+
 /* Header */
 .header {
   text-align: center;
@@ -565,6 +581,21 @@ body::after {
 .section:hover {
   border-color: var(--border-light);
 }
+
+/* Bottom sections grid — 桌面端三列并排 */
+.bottom-sections-grid {
+  display: grid;
+  gap: 10px;
+}
+@media (min-width: 768px) {
+  .bottom-sections-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .bottom-sections-grid .section {
+    margin-bottom: 0;
+  }
+}
+
 .section-header {
   display: flex;
   justify-content: space-between;
@@ -845,11 +876,33 @@ body::after {
 ::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
+/* Mobile small screen */
 @media (max-width: 360px) {
   .container { padding: 14px 12px 24px; }
   .header h1 { font-size: 30px; }
   .btn { font-size: 17px; padding: 15px 20px; }
   .result-name { font-size: 22px; }
+}
+
+/* 平板及以上 — 标题、图片、间距增强 */
+@media (min-width: 640px) {
+  .header { padding: 40px 0 8px; }
+  .header h1 { font-size: 48px; }
+  .header .subtitle { font-size: 15px; }
+  .header::after { margin-top: 18px; }
+  .result-photo { height: 280px; }
+  .result-name { font-size: 30px; }
+  .result-stars { font-size: 18px; }
+  .btn { font-size: 22px; }
+  .btn-row { margin: 8px 0 24px; }
+}
+
+/* 桌面 — 更大间距 */
+@media (min-width: 900px) {
+  .header { padding: 48px 0 12px; }
+  .header h1 { font-size: 56px; }
+  .result-photo { height: 320px; }
+  .result-card { padding: 28px 28px; }
 }
 </style>
 </head>
@@ -959,6 +1012,9 @@ body::after {
     </div>
   </div>
 
+  <!-- Bottom sections: 桌面端三列并排 -->
+  <div class="bottom-sections-grid">
+
   <!-- History -->
   <div class="section">
     <div class="section-header" id="historyHeader" role="button" tabindex="0" aria-expanded="false">
@@ -992,6 +1048,8 @@ body::after {
       <div id="favList"><div class="list-empty">暂无收藏</div></div>
     </div>
   </div>
+
+  </div><!-- /bottom-sections-grid -->
 
   <div class="footer">Powered by 高德地图 · 数据仅供参考</div>
 

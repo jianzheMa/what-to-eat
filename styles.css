@@ -1539,6 +1539,23 @@ body::before {
 .bottom-sections-grid {
   display: grid;
   gap: 12px;
+  align-items: stretch;
+}
+
+.bottom-sections-grid > .section {
+  min-height: 142px;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+
+.bottom-sections-grid > .section > .section-header {
+  flex: 1;
+  min-height: 104px;
+}
+
+.bottom-sections-grid > .section > .section-body.open {
+  flex: 0 0 auto;
 }
 
 .list-empty {

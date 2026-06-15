@@ -700,6 +700,7 @@ function getPhotoUrl(poi) {
 function displayResult(restaurant) {
   state.currentResult = restaurant;
   destroyMiniMap();
+  dom.resultCard.classList.remove('is-multi-result');
 
   if (!restaurant) {
     dom.resultCard.classList.remove('has-result');
@@ -765,7 +766,7 @@ function displayResult(restaurant) {
 }
 
 function displayMultiResult(restaurants) {
-  dom.resultCard.classList.add('has-result');
+  dom.resultCard.classList.add('has-result', 'is-multi-result');
   let html = '<div class="mr-count-header">为你找到 ' + restaurants.length + ' 家</div>';
   html += restaurants.map(function(r, i) {
     const rating = getRating(r);

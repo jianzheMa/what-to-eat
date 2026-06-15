@@ -1050,6 +1050,12 @@ body::before {
   padding: 22px 16px 56px;
 }
 
+.decision-panel,
+.result-panel {
+  display: flex;
+  flex-direction: column;
+}
+
 .header {
   position: relative;
   text-align: left;
@@ -1243,6 +1249,10 @@ body::before {
 .result-card.has-result {
   align-content: start;
   animation: resultEnter 520ms var(--ease);
+}
+
+.result-card.is-multi-result {
+  min-height: 0;
 }
 
 @keyframes resultEnter {
@@ -1662,45 +1672,44 @@ body::before {
     padding: 42px 28px 72px;
     display: grid;
     grid-template-columns: minmax(280px, 0.86fr) minmax(360px, 1.14fr);
-    gap: 0 24px;
+    gap: 24px;
     align-items: start;
   }
 
-  .header { grid-column: 1; grid-row: 1; }
-  .shake-hint { grid-column: 1; grid-row: 2; }
-  .location-row { grid-column: 1; grid-row: 3; }
-  .api-key-section { grid-column: 1; grid-row: 4; }
-  .pick-count-row { grid-column: 1; grid-row: 5; }
-  .btn-row { grid-column: 1; grid-row: 6; }
-  .filter-section { grid-column: 1; grid-row: 7; }
+  .decision-panel {
+    grid-column: 1;
+    grid-row: 1;
+    gap: 0;
+  }
+
+  .result-panel {
+    grid-column: 2;
+    grid-row: 1;
+    gap: 14px;
+  }
 
   .result-card {
-    grid-column: 2;
-    grid-row: 1 / 8;
-    align-self: stretch;
-    min-height: 520px;
+    min-height: clamp(360px, 58vh, 620px);
     padding: 30px;
   }
 
-  .result-actions {
-    grid-column: 2;
-    grid-row: 8;
-    align-self: start;
+  .result-card.has-result {
+    min-height: 0;
   }
 
   .bottom-sections-grid {
     grid-column: 1 / -1;
-    grid-row: 9;
+    grid-row: 2;
   }
 
   .footer {
     grid-column: 1 / -1;
-    grid-row: 10;
+    grid-row: 3;
   }
 
   #debugPanel {
     grid-column: 1 / -1;
-    grid-row: 11;
+    grid-row: 4;
   }
 
   .bottom-sections-grid {

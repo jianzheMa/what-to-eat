@@ -22,6 +22,8 @@
 
 <main class="container">
 
+  <section class="decision-panel" aria-label="决策控制">
+
   <!-- Header -->
   <header class="header">
     <h1>今天吃什么</h1>
@@ -66,22 +68,6 @@
   <!-- Main CTA -->
   <div class="btn-row">
     <button class="btn btn-primary" id="pickBtn" disabled aria-label="随机选一家">随机选一家</button>
-  </div>
-
-  <!-- Result Card -->
-  <div class="result-card" id="resultCard" aria-live="polite" aria-atomic="true">
-    <div class="result-empty">
-      <div class="empty-symbol">食</div>
-      <p>定位完成后，点一下就能决定今天吃什么</p>
-    </div>
-  </div>
-
-  <!-- Actions -->
-  <div class="result-actions hidden" id="resultActions">
-    <button class="btn btn-secondary btn-sm" id="rerollBtn">换一个</button>
-    <button class="btn btn-secondary btn-sm" id="blacklistBtn">拉黑</button>
-    <button class="btn btn-secondary btn-sm" id="favResultBtn">想去</button>
-    <button class="btn btn-secondary btn-sm" id="shareBtn">分享</button>
   </div>
 
   <!-- Filters -->
@@ -140,6 +126,26 @@
       </div>
     </div>
   </div>
+
+  </section>
+
+  <section class="result-panel" aria-label="推荐结果">
+    <!-- Result Card -->
+    <div class="result-card" id="resultCard" aria-live="polite" aria-atomic="true">
+      <div class="result-empty">
+        <div class="empty-symbol">食</div>
+        <p>定位完成后，点一下就能决定今天吃什么</p>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="result-actions hidden" id="resultActions">
+      <button class="btn btn-secondary btn-sm" id="rerollBtn">换一个</button>
+      <button class="btn btn-secondary btn-sm" id="blacklistBtn">拉黑</button>
+      <button class="btn btn-secondary btn-sm" id="favResultBtn">想去</button>
+      <button class="btn btn-secondary btn-sm" id="shareBtn">分享</button>
+    </div>
+  </section>
 
   <!-- Bottom 3-col -->
   <div class="bottom-sections-grid">
